@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "deltahard:brick_stairs"
+    }
+  ],
+  "result": {
+    "item": "minecraft:brick_stairs"
+  }
+}

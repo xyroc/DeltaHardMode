@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:purpur_block",
+      "data": 0
+    }
+  },
+  "result": {
+    "item": "deltahard:purpur_stairs",
+    "count": 4
+  }
+}

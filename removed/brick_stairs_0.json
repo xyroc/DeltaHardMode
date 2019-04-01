@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:brick",
+      "data": 0
+    }
+  },
+  "result": {
+    "item": "deltahard:brick_stairs",
+    "count": 4
+  }
+}

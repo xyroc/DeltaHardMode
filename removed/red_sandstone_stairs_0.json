@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:red_sandstone",
+      "data": 0
+    }
+  },
+  "result": {
+    "item": "deltahard:red_sandstone_stairs",
+    "count": 4
+  }
+}

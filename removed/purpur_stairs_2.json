@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "deltahard:purpur_stairs"
+    }
+  ],
+  "result": {
+    "item": "minecraft:purpur_stairs"
+  }
+}

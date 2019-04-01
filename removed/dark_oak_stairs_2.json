@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "deltahard:dark_oak_stairs"
+    }
+  ],
+  "result": {
+    "item": "minecraft:dark_oak_stairs"
+  }
+}
