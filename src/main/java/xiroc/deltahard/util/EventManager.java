@@ -45,6 +45,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.repackage.com.nothome.delta.Delta;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
 import xiroc.deltahard.common.block.DeltaHardBlocks;
@@ -212,12 +213,26 @@ public class EventManager {
 		if (event.getWorld().isRemote)
 			return;
 		if (event.getState().getBlock() instanceof BlockLeaves) {
-			event.getDrops().clear();
-			return;
+			Iterator<ItemStack> iterator = event.getDrops().iterator();
+			while (iterator.hasNext()) {
+				ItemStack item = iterator.next();
+				DeltaHard.logger.info(item);
+				if (item.getItem() == Item.getItemFromBlock(Blocks.SAPLING)) {
+					iterator.remove();
+				}
+				return;
+			}
 		}
 		if (event.getState().getBlock() instanceof BlockTallGrass) {
-			event.getDrops().clear();
-			return;
+			Iterator<ItemStack> iterator = event.getDrops().iterator();
+			while (iterator.hasNext()) {
+				ItemStack item = iterator.next();
+				DeltaHard.logger.info(item);
+				if (item.getItem() == Items.WHEAT_SEEDS) {
+					iterator.remove();
+				}
+				return;
+			}
 		}
 	}
 
