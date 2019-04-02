@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 public class FallingBlockHelper {
 
 	public static ArrayList<Block> gravityBlocks = new ArrayList();
+	public static ArrayList<IBlockState> gravityStates = new ArrayList();
 
 	public static void updateNeighbors(World worldIn, BlockPos pos, boolean fallInstantly) {
 		int x = pos.getX();
@@ -27,7 +28,8 @@ public class FallingBlockHelper {
 	}
 
 	public static void checkFallable(World worldIn, BlockPos pos, boolean fallInstantly) {
-		if(!gravityBlocks.contains(worldIn.getBlockState(pos).getBlock())) return;
+		if (!gravityBlocks.contains(worldIn.getBlockState(pos).getBlock()) && !gravityStates.contains(worldIn.getBlockState(pos)))
+			return;
 		if ((worldIn.isAirBlock(pos.down()) || canFallThrough(worldIn.getBlockState(pos.down()))) && pos.getY() >= 0) {
 			int i = 32;
 

@@ -8,6 +8,8 @@ import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockStairs;
+import net.minecraft.block.BlockStone;
+import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -64,6 +66,9 @@ public class EventManager {
 		FallingBlockHelper.gravityBlocks.add(Blocks.PLANKS);
 		FallingBlockHelper.gravityBlocks.add(Blocks.WOODEN_SLAB);
 		FallingBlockHelper.gravityBlocks.add(Blocks.DOUBLE_WOODEN_SLAB);
+
+		FallingBlockHelper.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
+		FallingBlockHelper.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
 	}
 
 	@SubscribeEvent
@@ -155,8 +160,6 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onBonemeal(BonemealEvent event) {
-		if (event.getEntityPlayer().world.isRemote)
-			return;
 		if (!(event.getBlock().getBlock() instanceof BlockCrops))
 			return;
 		if (!ConfigHelper.getProperty("CHANGE_BONEMEAL"))
@@ -175,12 +178,13 @@ public class EventManager {
 						if (i > j)
 							i = j;
 						worldIn.setBlockState(event.getPos(), block.withAge(i), 2);
-						ItemDye.spawnBonemealParticles(worldIn, event.getPos(), 2);
+						event.getStack().shrink(1);
 						event.getEntityPlayer().swingArm(event.getHand());
+						DeltaHard.logger.info(event.getStack().getCount());
 					}
-					event.getEntityPlayer().getActiveItemStack().shrink(1);
 				}
 			}
+			ItemDye.spawnBonemealParticles(worldIn, event.getPos(), 5);
 		}
 	}
 
