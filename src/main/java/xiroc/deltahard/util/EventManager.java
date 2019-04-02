@@ -45,7 +45,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.repackage.com.nothome.delta.Delta;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
 import xiroc.deltahard.common.block.DeltaHardBlocks;
