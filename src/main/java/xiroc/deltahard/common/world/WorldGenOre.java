@@ -1,4 +1,4 @@
-package xiroc.deltahard.world;
+package xiroc.deltahard.common.world;
 
 import java.util.Random;
 

@@ -1,4 +1,4 @@
-package xiroc.deltahard.util;
+package xiroc.deltahard.common.util;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
