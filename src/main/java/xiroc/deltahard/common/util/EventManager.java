@@ -11,10 +11,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockCocoa;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockDoubleStoneSlab;
+import net.minecraft.block.BlockHalfStoneSlab;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockStoneSlab;
+import net.minecraft.block.BlockStoneSlabNew;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -32,6 +35,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntityElderGuardian;
 import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.entity.monster.EntityHusk;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntitySpider;
@@ -39,6 +43,7 @@ import net.minecraft.entity.monster.EntityStray;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityWitherSkeleton;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityZombieHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.SleepResult;
@@ -75,10 +80,13 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
+import xiroc.deltahard.common.loot.LootFunctionBase;
+import xiroc.deltahard.common.loot.LootFunctionSaplings;
 
 public class EventManager {
 
@@ -96,9 +104,16 @@ public class EventManager {
 		ConfigCache.gravityBlocks.add(Blocks.PLANKS);
 		ConfigCache.gravityBlocks.add(Blocks.WOODEN_SLAB);
 		ConfigCache.gravityBlocks.add(Blocks.DOUBLE_WOODEN_SLAB);
+		ConfigCache.gravityBlocks.add(Blocks.STONE_STAIRS);
+		ConfigCache.gravityBlocks.add(Blocks.STONE_SLAB);
+		ConfigCache.gravityBlocks.add(Blocks.STONE_SLAB2);
 
-		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
-		ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
+		// ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
+		// BlockStoneSlab.EnumType.COBBLESTONE));
+		// ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
+		// BlockStoneSlab.EnumType.COBBLESTONE));
+		// BlockStoneSlabNew
+		// BlockDoubleStoneSlab BlockDoubleStoneSlabNew
 	}
 
 	@SubscribeEvent
@@ -154,7 +169,8 @@ public class EventManager {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 10, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian"), new LootEntryItem(Items.WHEAT_SEEDS, 15, 1, new LootFunction[0], new LootCondition[0], "deltahard:wheat_seeds") }, new LootCondition[0], new RandomValueRange(2), new RandomValueRange(1, 2), "deltahard:loot_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 10, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian"), new LootEntryItem(Item.getItemFromBlock(Blocks.SAPLING), 8, 1, new LootFunction[] { new LootFunctionSaplings(new LootCondition[0]) }, new LootCondition[0], "deltahard:saplings") }, new LootCondition[0], new RandomValueRange(2), new RandomValueRange(1, 2), "deltahard:loot_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.WHEAT_SEEDS, 4, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 8) }, new LootCondition[0], "deltahard:wheat_seeds") }, new LootCondition[] {}, new RandomValueRange(1, 8), new RandomValueRange(1, 16), "deltahard:loot_pool_seeds"));
 			break;
 		}
 		case "minecraft:chests/jungle_temple": {
@@ -175,13 +191,6 @@ public class EventManager {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			// LootEntryItem obsidian = new
-			// LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 20, 1, new
-			// LootFunction[0], new LootCondition[0], "deltahard:obsidian");
-			// LootPool pool = new LootPool(new LootEntry[] { obsidian }, new
-			// LootCondition[0], new RandomValueRange(2), new RandomValueRange(1, 1),
-			// "deltahard:obsidian_pool");
-			// event.getTable().addPool(pool);
 			event.getTable().getPool("main").removeEntry("minecraft:obsidian");
 
 			break;
@@ -313,12 +322,22 @@ public class EventManager {
 		if (hasTag(entity))
 			return;
 		tagEntity(entity);
+		if (entity instanceof EntitySquid) {
+			if (entity.world.rand.nextFloat() <= 0.29) {
+				EntityGuardian guardian = new EntityGuardian(entity.world);
+				guardian.setPosition(entity.posX, entity.posY, entity.posZ);
+				tagEntity(guardian);
+				entity.world.spawnEntity(guardian);
+				entity.setDead();
+			}
+		}
 		if (entity instanceof EntityStray) {
 			if (entity.dimension == -1) {
 				EntityWitherSkeleton skeleton = new EntityWitherSkeleton(entity.world);
 				skeleton.setPosition(entity.posX, entity.posY, entity.posZ);
 				skeleton.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));
 				entity.world.spawnEntity(skeleton);
+				tagEntity(skeleton);
 				entity.setDead();
 				return;
 			}
@@ -329,16 +348,18 @@ public class EventManager {
 				skeleton.setPosition(entity.posX, entity.posY, entity.posZ);
 				skeleton.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));
 				entity.world.spawnEntity(skeleton);
+				tagEntity(skeleton);
 				entity.setDead();
 				return;
 			}
 			if (entity.dimension == 0) {
 				if (!(entity.world.getBiome(entity.getPosition()) == Biomes.ICE_MOUNTAINS || entity.world.getBiome(entity.getPosition()) == Biomes.ICE_PLAINS || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_OCEAN || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_RIVER)) {
-					if (entity.world.rand.nextFloat() <= 0.29) {
+					if (entity.world.rand.nextFloat() <= 0.09) {
 						EntityStray stray = new EntityStray(entity.world);
 						stray.setPosition(entity.posX, entity.posY, entity.posZ);
 						stray.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));
 						entity.world.spawnEntity(stray);
+						tagEntity(stray);
 						entity.setDead();
 						return;
 					}
@@ -346,11 +367,14 @@ public class EventManager {
 			}
 		}
 		if (entity instanceof EntitySpider) {
-			if (entity.world.rand.nextFloat() <= 0.1 && !entity.isBeingRidden()) {
-				EntitySkeleton entityskeleton = new EntitySkeleton(entity.world);
+			if (entity.world.rand.nextFloat() <= 0.04 && !entity.isBeingRidden()) {
+				EntityLiving entityskeleton = (entity.world.rand.nextFloat() > 0.09) ? new EntitySkeleton(entity.world) : new EntityStray(entity.world);
 				entityskeleton.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, 0.0F);
+				entityskeleton.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));
+				tagEntity(entityskeleton);
 				entity.world.spawnEntity(entityskeleton);
-				entityskeleton.startRiding(entity);
+				entityskeleton.startRiding(entity, true);
+				tagEntity(entity);
 				return;
 			}
 		}
@@ -359,7 +383,7 @@ public class EventManager {
 			husk.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(25.0D);
 			husk.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
 			husk.setHealth(husk.getMaxHealth());
-			if (entity.world.rand.nextFloat() <= 0.14) {
+			if (entity.world.rand.nextFloat() <= 0.04) {
 				EntityZombieHorse horse = new EntityZombieHorse(entity.world);
 				horse.setPosition(entity.posX, entity.posY, entity.posZ);
 				horse.setHorseTamed(true);
@@ -373,17 +397,18 @@ public class EventManager {
 			if (!zombie.isChild()) {
 				zombie.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.27);
 			}
-			if (entity.world.rand.nextFloat() <= 0.29 && !(entity.world.getBiome(entity.getPosition()) == Biomes.DESERT || entity.world.getBiome(entity.getPosition()) == Biomes.DESERT_HILLS)) {
+			if (entity.world.rand.nextFloat() <= 0.14 && !(entity.world.getBiome(entity.getPosition()) == Biomes.DESERT || entity.world.getBiome(entity.getPosition()) == Biomes.DESERT_HILLS)) {
 				EntityHusk husk = new EntityHusk(entity.world);
 				husk.setPosition(entity.posX, entity.posY, entity.posZ);
 				entity.world.spawnEntity(husk);
 				entity.setDead();
 				entity = husk;
 			}
-			if (entity.world.rand.nextFloat() <= 0.14) {
+			if (entity.world.rand.nextFloat() <= 0.04) {
 				EntityZombieHorse horse = new EntityZombieHorse(entity.world);
 				horse.setPosition(entity.posX, entity.posY, entity.posZ);
 				horse.setHorseTamed(true);
+				tagEntity(horse);
 				entity.world.spawnEntity(horse);
 				entity.startRiding(horse);
 			}
@@ -419,7 +444,7 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onIntetact(EntityInteract event) {
-		DeltaHard.logger.info(((EntityLiving) event.getTarget()).getHealth());
+		// DeltaHard.logger.info(((EntityLiving) event.getTarget()).getHealth());
 	}
 
 	@SubscribeEvent
