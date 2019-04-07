@@ -290,7 +290,7 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onDrop(LivingDropsEvent event) {
-		if (event.getEntityLiving() instanceof EntitySkeleton && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP")) {
+		if ((event.getEntityLiving() instanceof EntitySkeleton || event.getEntityLiving() instanceof EntityStray) && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP")) {
 			Iterator<EntityItem> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				EntityItem item = iterator.next();
