@@ -30,8 +30,6 @@ public class DeltaHard {
 
 	public static final Logger logger = LogManager.getLogger("DeltaHard");
 
-	// BlockSlab, BlockStoneSlab, BlockWoodSlab, BlockFalling
-
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger.info("HELLO WORLD");
@@ -41,7 +39,7 @@ public class DeltaHard {
 		data.version = Reference.VERSION_STRING;
 		data.authorList.add("XIROC");
 		data.credits = Reference.CREDITS;
-		data.url = "https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/requests-ideas-for-mods/2939816-mod-idea-delta-hard-mode";
+		data.url = "http://xiroc.ovh/deltahardmode.html";
 		data.description = TextFormatting.RED + "There will be some json syntax exceptions when loading a world due to removed recipes. This is not a problem and there is currently no way to avoid that.";
 		MinecraftForge.EVENT_BUS.register(new EventManager());
 	}

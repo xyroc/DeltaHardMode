@@ -26,7 +26,7 @@ public class WorldGenOre implements IWorldGenerator {
 			break;
 		case 0:
 			// BlockSilverfish
-			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 14, 100, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world,
+			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 14, 50, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world,
 					random, chunkX, chunkZ);
 			break;
 		case 1:

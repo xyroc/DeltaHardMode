@@ -1,49 +1,40 @@
 package xiroc.deltahard.common.util;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Random;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCocoa;
 import net.minecraft.block.BlockCrops;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.BlockDoubleStoneSlab;
-import net.minecraft.block.BlockHalfStoneSlab;
-import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockStairs;
-import net.minecraft.block.BlockStone;
-import net.minecraft.block.BlockStoneSlab;
-import net.minecraft.block.BlockStoneSlabNew;
-import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityElderGuardian;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EntityEvoker;
 import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.entity.monster.EntityHusk;
+import net.minecraft.entity.monster.EntityIllusionIllager;
+import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityStray;
+import net.minecraft.entity.monster.EntityVindicator;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityWitherSkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.passive.EntityZombieHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.SleepResult;
@@ -51,16 +42,17 @@ import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootEntry;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
@@ -68,21 +60,20 @@ import net.minecraft.world.storage.loot.RandomValueRange;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
 import xiroc.deltahard.common.loot.LootFunctionBase;
@@ -107,22 +98,13 @@ public class EventManager {
 		ConfigCache.gravityBlocks.add(Blocks.STONE_STAIRS);
 		ConfigCache.gravityBlocks.add(Blocks.STONE_SLAB);
 		ConfigCache.gravityBlocks.add(Blocks.STONE_SLAB2);
-
-		// ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
-		// BlockStoneSlab.EnumType.COBBLESTONE));
-		// ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
-		// BlockStoneSlab.EnumType.COBBLESTONE));
-		// BlockStoneSlabNew
-		// BlockDoubleStoneSlab BlockDoubleStoneSlabNew
 	}
 
 	@SubscribeEvent
-	public void onItemRegistry(RegistryEvent.Register<Item> event) {
-	}
+	public void onItemRegistry(RegistryEvent.Register<Item> event) {}
 
 	@SubscribeEvent
-	public void registerRenderers(ModelRegistryEvent event) {
-	}
+	public void registerRenderers(ModelRegistryEvent event) {}
 
 	@SubscribeEvent
 	public void onRecipeRegistry(RegistryEvent.Register<IRecipe> event) {
@@ -135,7 +117,6 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void loadloot(LootTableLoadEvent event) {
-		// DeltaHard.logger.info("Loot Table " + event.getName());
 		switch (event.getName().toString()) {
 		case "minecraft:chests/stronghold_corridor": {
 			if (!ConfigHelper.getProperty("LOOT"))
@@ -237,8 +218,7 @@ public class EventManager {
 	}
 
 	@SubscribeEvent
-	public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-	}
+	public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {}
 
 	@SubscribeEvent
 	public void onBlock(RegistryEvent.Register<Block> event) {
@@ -247,8 +227,7 @@ public class EventManager {
 	}
 
 	@SubscribeEvent
-	public void onBlockDestroyed(BlockEvent.BreakEvent event) {
-	}
+	public void onBlockDestroyed(BlockEvent.BreakEvent event) {}
 
 	@SubscribeEvent
 	public void onBlockHarvestDrops(BlockEvent.HarvestDropsEvent event) {
@@ -290,7 +269,8 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onDrop(LivingDropsEvent event) {
-		if ((event.getEntityLiving() instanceof EntitySkeleton || event.getEntityLiving() instanceof EntityStray) && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP")) {
+		EntityLivingBase entity = event.getEntityLiving();
+		if ((entity instanceof EntitySkeleton || entity instanceof EntityStray) && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP")) {
 			Iterator<EntityItem> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				EntityItem item = iterator.next();
@@ -299,7 +279,7 @@ public class EventManager {
 			}
 			return;
 		}
-		if (event.getEntityLiving() instanceof EntitySpider && ConfigHelper.getProperty("SPIDER_NO_STRING_DROP")) {
+		if (entity instanceof EntitySpider && ConfigHelper.getProperty("SPIDER_NO_STRING_DROP")) {
 			Iterator<EntityItem> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				EntityItem item = iterator.next();
@@ -308,11 +288,57 @@ public class EventManager {
 			}
 			return;
 		}
+		if (entity instanceof EntityEvoker) {
+			event.getDrops().add(new EntityItem(entity.world, entity.posX, entity.posY, entity.posZ, new ItemStack(Items.TOTEM_OF_UNDYING)));
+			return;
+		}
+		if (entity instanceof EntityEnderman) {
+			Iterator<EntityItem> iterator = event.getDrops().iterator();
+			while (iterator.hasNext()) {
+				EntityItem item = iterator.next();
+				if (item.getItem().getItem() == Items.ENDER_PEARL) {
+					int count = item.getItem().getCount();
+					item.setItem(new ItemStack(item.getItem().getItem(), count >= 16 ? count : count + entity.world.rand.nextInt(2)));
+				}
+			}
+			return;
+		}
 	}
 
 	@SubscribeEvent
-	public void onEntityConstruct(EntityEvent.EntityConstructing event) {
+	public void onEntityConstruct(EntityEvent.EntityConstructing event) {}
+
+	@SubscribeEvent
+	public void onAttack(LivingAttackEvent event) {}
+
+	@SubscribeEvent
+	public void onDamage(LivingDamageEvent event) {
+		EntityLivingBase entity = event.getEntityLiving();
+		if ((entity instanceof EntitySpider || entity instanceof EntitySlime) && event.getSource() == DamageSource.FALL) {
+			event.setCanceled(true);
+			return;
+		}
+		if (entity instanceof EntityPlayer && event.getSource() instanceof EntityDamageSource && ((EntityDamageSource) event.getSource()).getTrueSource() instanceof EntityBlaze) {
+			entity.setFire(2);
+			return;
+		}
 	}
+
+	@SubscribeEvent
+	public void onExplosionStart(ExplosionEvent.Start event) {
+		Explosion explosion = event.getExplosion();
+		EntityLivingBase entity = explosion.getExplosivePlacedBy();
+		if (entity == null || event.getWorld().isRemote)
+			return;
+		if (entity instanceof EntityCreeper) {
+			DeltaHard.logger.info(entity);
+			event.setCanceled(true);
+			ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY, entity.posZ, 3, true, true);
+		}
+	}
+
+	@SubscribeEvent
+	public void onDetonate(ExplosionEvent.Detonate event) {}
 
 	@SubscribeEvent
 	public void onEnterChunk(EntityEvent.EnteringChunk event) {
@@ -322,8 +348,31 @@ public class EventManager {
 		if (hasTag(entity))
 			return;
 		tagEntity(entity);
+		if (entity instanceof EntityCreeper) {
+			EntityCreeper creeper = (EntityCreeper) entity;
+			NBTTagCompound nbt = new NBTTagCompound();
+			creeper.writeEntityToNBT(nbt);
+			nbt.setShort("Fuse", (short) 25);
+			creeper.readEntityFromNBT(nbt);
+			return;
+		}
+		if (entity instanceof EntityPigZombie) {
+			if (entity.world.rand.nextFloat() <= 0.09) {
+				EntityCreeper creeper = new EntityCreeper(entity.world);
+				creeper.setPosition(entity.posX, entity.posY, entity.posZ);
+				tagEntity(creeper);
+				entity.world.spawnEntity(creeper);
+				entity.setDead();
+			}
+			return;
+		}
+		if (entity instanceof EntityWolf) {
+			EntityWolf wolf = (EntityWolf) entity;
+			wolf.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35D);
+			return;
+		}
 		if (entity instanceof EntitySquid) {
-			if (entity.world.rand.nextFloat() <= 0.29) {
+			if (entity.world.rand.nextFloat() <= 0.09) {
 				EntityGuardian guardian = new EntityGuardian(entity.world);
 				guardian.setPosition(entity.posX, entity.posY, entity.posZ);
 				tagEntity(guardian);
@@ -365,8 +414,27 @@ public class EventManager {
 					}
 				}
 			}
+			return;
+		}
+		if (entity instanceof EntityEvoker) {
+			EntityEvoker evoker = (EntityEvoker) entity;
+			evoker.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(50.0D);
+			evoker.setHealth(evoker.getMaxHealth());
+			return;
+		}
+		if (entity instanceof EntityVindicator) {
+			if (entity.world.rand.nextFloat() <= 0.09) {
+				EntityIllusionIllager illusionIllager = new EntityIllusionIllager(entity.world);
+				illusionIllager.setPosition(entity.posX, entity.posY, entity.posZ);
+				tagEntity(illusionIllager);
+				entity.world.spawnEntity(illusionIllager);
+				entity.setDead();
+			}
+			return;
 		}
 		if (entity instanceof EntitySpider) {
+			EntitySpider spider = (EntitySpider) entity;
+			spider.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35D);
 			if (entity.world.rand.nextFloat() <= 0.04 && !entity.isBeingRidden()) {
 				EntityLiving entityskeleton = (entity.world.rand.nextFloat() > 0.09) ? new EntitySkeleton(entity.world) : new EntityStray(entity.world);
 				entityskeleton.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, 0.0F);
@@ -423,6 +491,7 @@ public class EventManager {
 		if (entity instanceof EntityWitch) {
 			EntityWitch witch = (EntityWitch) entity;
 			witch.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
+			witch.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.27D);
 			witch.setHealth(witch.getMaxHealth());
 			return;
 		}
@@ -432,6 +501,11 @@ public class EventManager {
 			elderGuardian.setHealth(elderGuardian.getMaxHealth());
 			return;
 		}
+		if (entity instanceof EntityWither) {
+			EntityWither wither = (EntityWither) entity;
+			wither.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.65D);
+			return;
+		}
 		if (entity instanceof EntityDragon) {
 			EntityDragon dragon = (EntityDragon) entity;
 			dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(300.0D);
@@ -439,13 +513,25 @@ public class EventManager {
 			dragon.setHealth(dragon.getMaxHealth());
 			return;
 		}
-
 	}
 
 	@SubscribeEvent
-	public void onIntetact(EntityInteract event) {
-		// DeltaHard.logger.info(((EntityLiving) event.getTarget()).getHealth());
+	public void onDeath(LivingDeathEvent event) {
+		EntityLivingBase entity = event.getEntityLiving();
+		if (!event.isCanceled() && !entity.world.isRemote) {
+			if (entity instanceof EntityEnderman) {
+				for (int i = 0; i < entity.world.rand.nextInt(2) + 1; i++) {
+					EntityEndermite endermite = new EntityEndermite(entity.world);
+					endermite.setPosition(entity.posX, entity.posY, entity.posZ);
+					tagEntity(endermite);
+					entity.world.spawnEntity(endermite);
+				}
+			}
+		}
 	}
+
+	@SubscribeEvent
+	public void onIntetact(EntityInteract event) {}
 
 	@SubscribeEvent
 	public void onSleep(PlayerSleepInBedEvent event) {
@@ -459,11 +545,11 @@ public class EventManager {
 		event.getEntityPlayer().setSpawnPoint(event.getEntityPlayer().getPosition(), true);
 	}
 
-	public void tagEntity(Entity entity) {
+	public static void tagEntity(Entity entity) {
 		entity.getEntityData().setBoolean("deltahardmode_tagged", true);
 	}
 
-	public boolean hasTag(Entity entity) {
+	public static boolean hasTag(Entity entity) {
 		return entity.getEntityData().hasKey("deltahardmode_tagged");
 	}
 
