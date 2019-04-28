@@ -16,7 +16,7 @@ public class Reference {
 	public static final String NAME = "DeltaHard";
 	public static final String MODID = "deltahard";
 	public static final String VERSION = "beta";
-	public static final String VERSION_STRING = "0.5.0";
+	public static final String VERSION_STRING = "0.5.1";
 	public static final String AUTHOR = TextFormatting.GREEN + "XIROC";
 	public static final String CREDITS = "Idea by " + TextFormatting.GREEN + "ladallas_texas";
 	public static final String MINECRAFTVERSIONS = "[1.12],[1.12.1],[1.12.2]";
@@ -29,7 +29,6 @@ public class Reference {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				// TODO
 				try {
 					URL url = new URL(adress);
 					Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -47,7 +46,7 @@ public class Reference {
 	}
 
 	private static boolean versionNewerThan(String version1, String version2) {
-		// 1 newer than 2
+		// 1 newer than 2 (only 1 digit version numbers supported ex. 1.1.1 or 0.4.2)
 		try {
 			if (Integer.parseInt(version1.replace(".", "")) > Integer.parseInt(version2.replace(".", "")))
 				return true;

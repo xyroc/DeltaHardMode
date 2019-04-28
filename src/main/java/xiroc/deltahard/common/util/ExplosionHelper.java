@@ -1,24 +1,13 @@
 package xiroc.deltahard.common.util;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.Sets;
-
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.EntityAreaEffectCloud;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
@@ -26,9 +15,29 @@ public class ExplosionHelper {
 
 	public static Explosion newExplosion(@Nullable Entity entityIn, World world, double x, double y, double z, float radius, boolean isFlaming, boolean damage) {
 		Explosion explosion = new Explosion(world, entityIn, x, y, z, radius, isFlaming, damage);
-		explosion.doExplosionA();
+		if (!world.isRemote)
+			explosion.doExplosionA();
 		explosion.doExplosionB(true);
 		return explosion;
+	}
+
+	public static void spawnLingeringCloud(EntityCreeper creeper) {
+		Collection<PotionEffect> collection = creeper.getActivePotionEffects();
+
+		if (!collection.isEmpty()) {
+			EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(creeper.world, creeper.posX, creeper.posY, creeper.posZ);
+			entityareaeffectcloud.setRadius(2.5F);
+			entityareaeffectcloud.setRadiusOnUse(-0.5F);
+			entityareaeffectcloud.setWaitTime(10);
+			entityareaeffectcloud.setDuration(entityareaeffectcloud.getDuration() / 2);
+			entityareaeffectcloud.setRadiusPerTick(-entityareaeffectcloud.getRadius() / (float) entityareaeffectcloud.getDuration());
+
+			for (PotionEffect potioneffect : collection) {
+				entityareaeffectcloud.addEffect(new PotionEffect(potioneffect));
+			}
+
+			creeper.world.spawnEntity(entityareaeffectcloud);
+		}
 	}
 
 }

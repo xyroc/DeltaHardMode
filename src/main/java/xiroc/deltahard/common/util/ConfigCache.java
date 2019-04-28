@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.Loader;
 import xiroc.deltahard.DeltaHard;
 
@@ -18,7 +19,9 @@ public class ConfigCache {
 	public static ArrayList<Block> gravityBlocks = new ArrayList();
 	public static ArrayList<IBlockState> gravityStates = new ArrayList();
 	public static ArrayList<String> dropBlocks = new ArrayList();
+	public static ArrayList<IBlockState> dropStates = new ArrayList();
 	public static ArrayList<String> removedDrops = new ArrayList();
+	public static ArrayList<Item> removedItems = new ArrayList();
 
 	public static void load() {
 		DeltaHard.logger.info("Loading Config Cache");
