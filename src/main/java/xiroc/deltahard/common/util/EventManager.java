@@ -6,6 +6,9 @@ import java.util.Iterator;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockNewLog;
+import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockStone;
@@ -130,8 +133,13 @@ public class EventManager {
 		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.JUNGLE));
 		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE));
 
-		ConfigCache.dropStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.BIRCH));
-		ConfigCache.dropStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.DARK_OAK));
+		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.X));
+		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Y));
+		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Z));
+		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.X));
+		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Y));
+		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Z));
+
 	}
 
 	@SubscribeEvent
@@ -248,7 +256,7 @@ public class EventManager {
 		if (event.player.world.isRemote)
 			return;
 		if (event.player.getSleepTimer() >= 80 && ConfigHelper.getProperty("NO_SLEEP")) {
-			// event.player.wakeUpPlayer(true, false, true);
+			event.player.wakeUpPlayer(true, false, true);
 			event.player.sendStatusMessage(new TextComponentString("I cant sleep now..."), true);
 		}
 	}
@@ -277,7 +285,7 @@ public class EventManager {
 			Iterator<ItemStack> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				ItemStack item = iterator.next();
-				if (item.getItemDamage() == BlockPlanks.EnumType.BIRCH.getMetadata() || item.getItemDamage() == BlockPlanks.EnumType.DARK_OAK.getMetadata())
+				if (item.getItemDamage() == BlockPlanks.EnumType.BIRCH.getMetadata() || item.getItemDamage() == BlockPlanks.EnumType.DARK_OAK.getMetadata() - 4)
 					iterator.remove();
 				return;
 			}
@@ -497,7 +505,7 @@ public class EventManager {
 			return;
 		}
 		if (entity instanceof EntitySquid) {
-			if (entity.world.rand.nextFloat() <= 0.14) {
+			if (entity.world.rand.nextFloat() <= 0.7) {
 				EntityGuardian guardian = new EntityGuardian(entity.world);
 				guardian.setPosition(entity.posX, entity.posY, entity.posZ);
 				tagEntity(guardian);
@@ -597,14 +605,12 @@ public class EventManager {
 				entity.setDead();
 				entity = husk;
 			}
-			if (entity.world.rand.nextFloat() <= 0.02) {
-				EntityZombieHorse horse = new EntityZombieHorse(entity.world);
-				horse.setPosition(entity.posX, entity.posY, entity.posZ);
-				horse.setHorseTamed(true);
-				tagEntity(horse);
-				entity.world.spawnEntity(horse);
-				entity.startRiding(horse);
-			}
+			/*
+			 * if (entity.world.rand.nextFloat() <= 0.02) { EntityZombieHorse horse = new
+			 * EntityZombieHorse(entity.world); horse.setPosition(entity.posX, entity.posY,
+			 * entity.posZ); horse.setHorseTamed(true); tagEntity(horse);
+			 * entity.world.spawnEntity(horse); entity.startRiding(horse); }
+			 */
 			return;
 		}
 		if (entity instanceof EntityGhast) {
@@ -681,26 +687,21 @@ public class EventManager {
 	}
 
 	/*
-	@SubscribeEvent
-	public void onInteract(PlayerInteractEvent.RightClickItem event) {
-	}
-
-	@SubscribeEvent
-	public void onItemUseStart(LivingEntityUseItemEvent.Start event) {
-	}
-
-	@SubscribeEvent
-	public void onItemUseStart(LivingEntityUseItemEvent.Stop event) {
-	}
-
-	@SubscribeEvent
-	public void onItemUseStart(LivingEntityUseItemEvent.Tick event) {
-	}
-
-	@SubscribeEvent
-	public void onItemUseStart(LivingEntityUseItemEvent.Finish event) {
-	}
-	*/
+	 * @SubscribeEvent public void onInteract(PlayerInteractEvent.RightClickItem
+	 * event) { }
+	 * 
+	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Start
+	 * event) { }
+	 * 
+	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Stop
+	 * event) { }
+	 * 
+	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Tick
+	 * event) { }
+	 * 
+	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Finish
+	 * event) { }
+	 */
 
 	private static boolean containsEntityItem(Iterator<EntityItem> iterator, Item item) {
 		while (iterator.hasNext()) {

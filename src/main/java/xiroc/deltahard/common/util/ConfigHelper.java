@@ -13,16 +13,16 @@ public class ConfigHelper {
 
 	private static HashMap<String, Boolean> toggles;
 
-	private static boolean LOADED = false;
+	private static boolean loaded = false;
 
 	public static boolean getProperty(String name) {
-		if (!LOADED)
+		if (!loaded)
 			loadConfig();
 		return toggles.get(name);
 	}
 
 	public static void loadConfig() {
-		DeltaHard.logger.info("Loading Config (" + LOADED + "):");
+		DeltaHard.logger.info("Loading Config (" + loaded + "):");
 		toggles = new HashMap();
 		config = new Configuration(new File(Loader.instance().getConfigDir(), "//DeltaHardMode//DeltaHardMode.cfg"));
 		toggles.put("GRAVITY", config.getBoolean("GRAVITY", "general", true, "Determines, if dirt, cobblestone, wood planks, wooden stairs and wooden slabs should be affected by gravity (true = affected by gravity"));
@@ -34,7 +34,7 @@ public class ConfigHelper {
 		toggles.put("SPIDER_NO_STRING_DROP", config.getBoolean("SPIDER_NO_STRING_DROP", "mobs", true, "Determines if spiders drop strings or not. Affects both spiders and cave spiders. (true = no strings dropped)"));
 		if (config.hasChanged())
 			config.save();
-		LOADED = true;
+		loaded = true;
 		DeltaHard.logger.info("GRAVITY = " + toggles.get("GRAVITY"));
 		DeltaHard.logger.info("NO_OBSIDIAN = " + toggles.get("NO_OBSIDIAN"));
 		DeltaHard.logger.info("LOOT = " + toggles.get("LOOT"));
