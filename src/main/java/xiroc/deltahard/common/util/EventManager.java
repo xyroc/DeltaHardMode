@@ -7,9 +7,11 @@ import java.util.Iterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockStoneBrick;
 import net.minecraft.block.BlockStoneSlab;
+import net.minecraft.block.BlockStoneSlabNew;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -17,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityItem;
@@ -46,6 +49,7 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.passive.EntityZombieHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.SleepResult;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityDragonFireball;
 import net.minecraft.entity.projectile.EntityLargeFireball;
@@ -58,12 +62,15 @@ import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootEntry;
@@ -76,16 +83,21 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
@@ -110,6 +122,7 @@ public class EventManager {
 		ConfigCache.gravityBlocks.add(Blocks.STONE_STAIRS);
 
 		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
+		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE).withProperty(BlockSlab.HALF, BlockSlab.EnumBlockHalf.TOP));
 		ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
 		ConfigCache.gravityStates.add(Blocks.STONEBRICK.getDefaultState().withProperty(BlockStoneBrick.VARIANT, BlockStoneBrick.EnumType.CRACKED));
 		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.ACACIA));
@@ -144,7 +157,7 @@ public class EventManager {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.MAP, 5, 1, new LootFunction[] { new LootFunctionTreasureMap(new LootCondition[0]) }, new LootCondition[0], "deltahard:treasure_map") }, new LootCondition[0], new RandomValueRange(1), new RandomValueRange(1), "deltahard:treasure_map_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.MAP, 1, 1, new LootFunction[] { new LootFunctionTreasureMap(new LootCondition[0]) }, new LootCondition[0], "deltahard:treasure_map") }, new LootCondition[0], new RandomValueRange(1), new RandomValueRange(0), "deltahard:treasure_map_pool"));
 			break;
 		}
 		case "minecraft:chests/stronghold_crossing": {
@@ -227,6 +240,16 @@ public class EventManager {
 				}
 			}
 			ItemDye.spawnBonemealParticles(worldIn, event.getPos(), 5);
+		}
+	}
+
+	@SubscribeEvent
+	public void onPlayerTick(PlayerTickEvent event) {
+		if (event.player.world.isRemote)
+			return;
+		if (event.player.getSleepTimer() >= 80 && ConfigHelper.getProperty("NO_SLEEP")) {
+			// event.player.wakeUpPlayer(true, false, true);
+			event.player.sendStatusMessage(new TextComponentString("I cant sleep now..."), true);
 		}
 	}
 
@@ -338,35 +361,52 @@ public class EventManager {
 			EntityLargeFireball fireball = (EntityLargeFireball) event.getTarget();
 			event.setCanceled(true);
 			fireball.setDead();
-			boolean mobGriefing = fireball.world.isRemote ? false : fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-			ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+			if (!fireball.world.isRemote) {
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+			}
 			return;
 		}
 	}
 
 	@SubscribeEvent
 	public void onProjectileImpact(ProjectileImpactEvent event) {
+		if (event.getEntity().world.isRemote) {
+			event.setCanceled(true);
+			return;
+		}
 		if (event.getEntity() instanceof EntityArrow && event.getRayTraceResult().entityHit instanceof EntityLargeFireball) {
 			EntityLargeFireball fireball = (EntityLargeFireball) event.getRayTraceResult().entityHit;
 			event.setCanceled(true);
 			fireball.setDead();
-			boolean mobGriefing = fireball.world.isRemote ? false : fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-			ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+			if (!fireball.world.isRemote) {
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+			}
 			return;
 		}
 		if (event.getEntity() instanceof EntityLargeFireball) {
 			EntityLargeFireball fireball = (EntityLargeFireball) event.getEntity();
 			event.setCanceled(true);
 			fireball.setDead();
-			boolean mobGriefing = fireball.world.isRemote ? false : fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-			ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+			if (!fireball.world.isRemote) {
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+			}
 			return;
 		}
-		if (event.getEntity() instanceof EntityDragonFireball) {
+		if (event.getEntity() instanceof EntityDragonFireball && !(event.getRayTraceResult().entityHit instanceof EntityDragon)) {
 			EntityDragonFireball fireball = (EntityDragonFireball) event.getEntity();
-			boolean mobGriefing = fireball.world.isRemote ? false : fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-			ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, false, mobGriefing);
+			event.setCanceled(true);
 			fireball.setDead();
+			if (!fireball.world.isRemote) {
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, false, mobGriefing);
+				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+			}
 		}
 	}
 
@@ -393,14 +433,16 @@ public class EventManager {
 			event.setCanceled(true);
 			EntityCreeper creeper = (EntityCreeper) entity;
 			Explosion explosion = ExplosionHelper.newExplosion(entity, event.getWorld(), creeper.posX, creeper.posY, creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, mobGriefing);
-			DeltaHard.NET.sendToAllAround(new PacketClientExplosion(creeper.posX, creeper.posY, creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(creeper.dimension, creeper.posX, creeper.posY, creeper.posZ, 16.0D));
+			DeltaHard.NET.sendToAllAround(new PacketClientExplosion(creeper.posX, creeper.posY, creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(creeper.dimension, creeper.posX, creeper.posY, creeper.posZ, 64.0D));
 			ExplosionHelper.spawnLingeringCloud(creeper);
 			entity.setDead();
 			return;
 		}
 		if (entity instanceof EntityWither) {
 			event.setCanceled(true);
-			ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY, entity.posZ, 10, false, mobGriefing);
+			EntityWither wither = (EntityWither) entity;
+			Explosion explosion = ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY, entity.posZ, 10, false, mobGriefing);
+			DeltaHard.NET.sendToAllAround(new PacketClientExplosion(wither.posX, wither.posY, wither.posZ, 10, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(wither.dimension, wither.posX, wither.posY, wither.posZ, 64.0D));
 			return;
 		}
 	}
@@ -411,12 +453,25 @@ public class EventManager {
 	}
 
 	@SubscribeEvent
+	public void onClick(PlayerInteractEvent.RightClickBlock event) {
+		DeltaHard.logger.info(event.getWorld().getBlockState(event.getPos()).getBlock() + " // " + event.getUseBlock().getDeclaringClass());
+	}
+
+	@SubscribeEvent
+	public void onEntityConstruct(EntityEvent.EntityConstructing event) {
+	}
+
+	@SubscribeEvent
 	public void onEnterChunk(EntityEvent.EnteringChunk event) {
 		Entity entity = event.getEntity();
 		if (entity.world.isRemote || entity.ticksExisted > 5)
 			return;
 		if (hasTag(entity))
 			return;
+		if (entity instanceof EntityAnimal) {
+			AnimalHelper.initAnimalTasks((EntityAnimal) entity);
+			return;
+		}
 		tagEntity(entity);
 		if (entity instanceof EntityCreeper) {
 			EntityCreeper creeper = (EntityCreeper) entity;
@@ -610,18 +665,42 @@ public class EventManager {
 			return;
 		if (!ConfigHelper.getProperty("NO_SLEEP"))
 			return;
-		event.setResult(SleepResult.OTHER_PROBLEM);
-		event.getEntityPlayer().setSpawnPoint(event.getEntityPlayer().getPosition(), true);
+		// event.setResult(SleepResult.OTHER_PROBLEM);
+		// event.getEntityPlayer().setSpawnPoint(event.getEntityPlayer().getPosition(),
+		// true);
 	}
 
 	@SubscribeEvent
 	public void onInteract(PlayerInteractEvent.EntityInteract event) {
-		// EntityCow
-		DeltaHard.logger.info(event.getEntity() + " " + event.getTarget());
-		if (event.getTarget() instanceof EntityAnimal)
-			if (AnimalHelper.interact((EntityAnimal) event.getTarget(), event.getEntityPlayer(), event.getItemStack()))
+		if (event.getTarget() instanceof EntityAnimal) {
+			event.setCancellationResult(EnumActionResult.SUCCESS);
+			if (AnimalHelper.interact((EntityAnimal) event.getTarget(), event.getEntityPlayer(), event.getItemStack())) {
 				event.setCanceled(true);
+			}
+		}
 	}
+
+	/*
+	@SubscribeEvent
+	public void onInteract(PlayerInteractEvent.RightClickItem event) {
+	}
+
+	@SubscribeEvent
+	public void onItemUseStart(LivingEntityUseItemEvent.Start event) {
+	}
+
+	@SubscribeEvent
+	public void onItemUseStart(LivingEntityUseItemEvent.Stop event) {
+	}
+
+	@SubscribeEvent
+	public void onItemUseStart(LivingEntityUseItemEvent.Tick event) {
+	}
+
+	@SubscribeEvent
+	public void onItemUseStart(LivingEntityUseItemEvent.Finish event) {
+	}
+	*/
 
 	private static boolean containsEntityItem(Iterator<EntityItem> iterator, Item item) {
 		while (iterator.hasNext()) {

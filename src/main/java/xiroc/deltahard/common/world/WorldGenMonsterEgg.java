@@ -15,7 +15,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
-public class WorldGenOre implements IWorldGenerator {
+public class WorldGenMonsterEgg implements IWorldGenerator {
 
 	@Override
 	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
@@ -25,7 +25,7 @@ public class WorldGenOre implements IWorldGenerator {
 		case -1:
 			break;
 		case 0:
-			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 7, 50, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world,
+			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 7, 65, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world,
 					random, chunkX, chunkZ);
 			break;
 		case 1:

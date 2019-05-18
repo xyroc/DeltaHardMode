@@ -27,7 +27,7 @@ import xiroc.deltahard.common.network.PacketClientExplosion;
 import xiroc.deltahard.common.util.ConfigCache;
 import xiroc.deltahard.common.util.EventManager;
 import xiroc.deltahard.common.util.Reference;
-import xiroc.deltahard.common.world.WorldGenOre;
+import xiroc.deltahard.common.world.WorldGenMonsterEgg;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, acceptedMinecraftVersions = Reference.MINECRAFTVERSIONS)
 public class DeltaHard {
@@ -46,7 +46,7 @@ public class DeltaHard {
 		data.version = Reference.VERSION_STRING;
 		data.authorList.add(Reference.AUTHOR);
 		data.credits = Reference.CREDITS;
-		data.url = "http://xiroc.ovh/deltahardmode.html";
+		data.url = "http://xiroc.ovh/deltahardmode/deltahardmode";
 		data.description = TextFormatting.RED + "There will be some json syntax exceptions when loading a world due to removed recipes. This is not a problem and there is currently no way to avoid that.";
 		MinecraftForge.EVENT_BUS.register(new EventManager());
 	}
@@ -54,7 +54,7 @@ public class DeltaHard {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		ConfigCache.load();
-		GameRegistry.registerWorldGenerator(new WorldGenOre(), 1);
+		GameRegistry.registerWorldGenerator(new WorldGenMonsterEgg(), 1);
 		NET.registerMessage(PacketClientExplosion.MessageHandlerClientExplosion.class, PacketClientExplosion.class, PACKETS++, Side.CLIENT);
 	}
 

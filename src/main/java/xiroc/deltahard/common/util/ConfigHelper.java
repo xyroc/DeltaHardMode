@@ -22,7 +22,7 @@ public class ConfigHelper {
 	}
 
 	public static void loadConfig() {
-		DeltaHard.logger.info("Loading Config:");
+		DeltaHard.logger.info("Loading Config (" + LOADED + "):");
 		toggles = new HashMap();
 		config = new Configuration(new File(Loader.instance().getConfigDir(), "//DeltaHardMode//DeltaHardMode.cfg"));
 		toggles.put("GRAVITY", config.getBoolean("GRAVITY", "general", true, "Determines, if dirt, cobblestone, wood planks, wooden stairs and wooden slabs should be affected by gravity (true = affected by gravity"));
@@ -43,7 +43,5 @@ public class ConfigHelper {
 		DeltaHard.logger.info("SKELETON_NO_BOW_DROP = " + toggles.get("SKELETON_NO_BOW_DROP"));
 		DeltaHard.logger.info("SPIDER_NO_STRING_DROP = " + toggles.get("SPIDER_NO_STRING_DROP"));
 	}
-	
-	
 
 }
