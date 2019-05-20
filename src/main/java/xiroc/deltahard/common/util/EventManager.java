@@ -265,7 +265,7 @@ public class EventManager {
 	public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
 		if (event.getItemStack().getItem() == Items.BUCKET && ConfigHelper.getProperty("NO_OBSIDIAN")) {
 			RayTraceResult raytraceresult = RayTrace.rayTrace(event.getWorld(), event.getEntityPlayer(), true);
-			if (event.getWorld().getBlockState(raytraceresult.getBlockPos()).getMaterial() == Material.LAVA)
+			if (raytraceresult != null && event.getWorld().getBlockState(raytraceresult.getBlockPos()).getMaterial() == Material.LAVA)
 				event.setCanceled(true);
 		}
 	}
@@ -408,13 +408,12 @@ public class EventManager {
 		}
 		if (event.getEntity() instanceof EntityDragonFireball && !(event.getRayTraceResult().entityHit instanceof EntityDragon)) {
 			EntityDragonFireball fireball = (EntityDragonFireball) event.getEntity();
-			event.setCanceled(true);
-			fireball.setDead();
-			if (!fireball.world.isRemote) {
+			if (!fireball.world.isRemote && !fireball.isDead) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
 				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, false, mobGriefing);
 				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
+			fireball.setDead();
 		}
 	}
 
@@ -456,20 +455,6 @@ public class EventManager {
 	}
 
 	@SubscribeEvent
-	public void onDetonate(ExplosionEvent.Detonate event) {
-		// DeltaHard.logger.info("Detonation!");
-	}
-
-	@SubscribeEvent
-	public void onClick(PlayerInteractEvent.RightClickBlock event) {
-		DeltaHard.logger.info(event.getWorld().getBlockState(event.getPos()).getBlock() + " // " + event.getUseBlock().getDeclaringClass());
-	}
-
-	@SubscribeEvent
-	public void onEntityConstruct(EntityEvent.EntityConstructing event) {
-	}
-
-	@SubscribeEvent
 	public void onEnterChunk(EntityEvent.EnteringChunk event) {
 		Entity entity = event.getEntity();
 		if (entity.world.isRemote || entity.ticksExisted > 5)
@@ -505,7 +490,7 @@ public class EventManager {
 			return;
 		}
 		if (entity instanceof EntitySquid) {
-			if (entity.world.rand.nextFloat() <= 0.7) {
+			if (entity.world.rand.nextFloat() <= 0.07) {
 				EntityGuardian guardian = new EntityGuardian(entity.world);
 				guardian.setPosition(entity.posX, entity.posY, entity.posZ);
 				tagEntity(guardian);
