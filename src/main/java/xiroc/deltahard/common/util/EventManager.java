@@ -104,6 +104,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
 import xiroc.deltahard.DeltaHard;
+import xiroc.deltahard.common.loot.LootFunctionBase;
+import xiroc.deltahard.common.loot.LootFunctionSaplings;
 import xiroc.deltahard.common.loot.LootFunctionTreasureMap;
 import xiroc.deltahard.common.network.PacketClientExplosion;
 
@@ -158,7 +160,7 @@ public class EventManager {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/stronghold_library": {
@@ -172,43 +174,43 @@ public class EventManager {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/simple_dungeon": {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/nether_bridge": {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/abandoned_mineshaft": {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.WHEAT_SEEDS, 1, 1, new LootFunction[0], new LootCondition[0], "deltahard:wheat_seeds") }, new LootCondition[] {}, new RandomValueRange(1, 8), new RandomValueRange(0, 3), "deltahard:loot_pool_seeds"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.WHEAT_SEEDS, 1, 1, new LootFunction[0], new LootCondition[0], "deltahard:wheat_seeds"), new LootEntryItem(Item.getItemFromBlock(Blocks.SAPLING), 1, 1, new LootFunction[] { new LootFunctionSaplings(new LootCondition[0]) }, new LootCondition[0], "deltahard:sapling") }, new LootCondition[0], new RandomValueRange(1, 8), new RandomValueRange(0, 3), "deltahard:loot_pool_seeds_and_saplings"));
 			break;
 		}
 		case "minecraft:chests/jungle_temple": {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/desert_pyramid": {
 			if (!ConfigHelper.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		case "minecraft:chests/village_blacksmith": {
@@ -216,7 +218,7 @@ public class EventManager {
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
 			event.getTable().getPool("main").removeEntry("minecraft:obsidian");
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new LootFunction[0], new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(4), "deltahard:obsidian_pool"));
+			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 1, 1, new LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new LootCondition[0], "deltahard:obsidian") }, new LootCondition[0], new RandomValueRange(1, 5), new RandomValueRange(0), "deltahard:obsidian_pool"));
 			break;
 		}
 		}
@@ -390,7 +392,7 @@ public class EventManager {
 			fireball.setDead();
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
 				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			return;
@@ -401,7 +403,7 @@ public class EventManager {
 			fireball.setDead();
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
 				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			return;
@@ -410,7 +412,7 @@ public class EventManager {
 			EntityDragonFireball fireball = (EntityDragonFireball) event.getEntity();
 			if (!fireball.world.isRemote && !fireball.isDead) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, false, mobGriefing);
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1.5F, false, mobGriefing);
 				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			fireball.setDead();
@@ -475,7 +477,7 @@ public class EventManager {
 			return;
 		}
 		if (entity instanceof EntityPigZombie) {
-			if (entity.world.rand.nextFloat() <= 0.14) {
+			if (entity.world.rand.nextFloat() <= 0.07) {
 				EntityCreeper creeper = new EntityCreeper(entity.world);
 				creeper.setPosition(entity.posX, entity.posY, entity.posZ);
 				tagEntity(creeper);
@@ -521,7 +523,7 @@ public class EventManager {
 			}
 			if (entity.dimension == 0) {
 				if (!(entity.world.getBiome(entity.getPosition()) == Biomes.ICE_MOUNTAINS || entity.world.getBiome(entity.getPosition()) == Biomes.ICE_PLAINS || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_OCEAN || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_RIVER)) {
-					if (entity.world.rand.nextFloat() <= 0.09) {
+					if (entity.world.rand.nextFloat() <= 0.07) {
 						EntityStray stray = new EntityStray(entity.world);
 						stray.setPosition(entity.posX, entity.posY, entity.posZ);
 						stray.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));

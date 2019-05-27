@@ -7,7 +7,7 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 
-public class LootFunctionSaplings extends LootFunction{
+public class LootFunctionSaplings extends LootFunction {
 
 	public LootFunctionSaplings(LootCondition[] conditionsIn) {
 		super(conditionsIn);
