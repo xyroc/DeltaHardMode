@@ -24,7 +24,7 @@ public class WorldGenMonsterEgg implements IWorldGenerator {
 		case -1:
 			break;
 		case 0:
-			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 3 + random.nextInt(3), 60, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world, random, chunkX, chunkZ);
+			runGenerator(Blocks.MONSTER_EGG.getDefaultState(), 3 + random.nextInt(3), 65, 1, 120, BlockMatcher.forBlock(Blocks.STONE), world, random, chunkX, chunkZ);
 			break;
 		case 1:
 			break;

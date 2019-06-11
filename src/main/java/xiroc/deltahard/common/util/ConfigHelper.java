@@ -16,12 +16,13 @@ public class ConfigHelper {
 	private static boolean loaded = false;
 
 	public static boolean getProperty(String name) {
-		if (!loaded)
-			loadConfig();
+		loadConfig();
 		return toggles.get(name);
 	}
 
 	public static void loadConfig() {
+		if (loaded)
+			return;
 		DeltaHard.logger.info("Loading Config (" + loaded + "):");
 		toggles = new HashMap();
 		config = new Configuration(new File(Loader.instance().getConfigDir(), "//DeltaHardMode//DeltaHardMode.cfg"));
