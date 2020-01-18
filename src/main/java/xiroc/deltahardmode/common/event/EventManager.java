@@ -3,6 +3,7 @@ package xiroc.deltahardmode.common.event;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -15,11 +16,8 @@ import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import xiroc.deltahardmode.DeltaHardMode;
 
-@Mod.EventBusSubscriber(modid = DeltaHardMode.MODID)
 public class EventManager {
 
 	@SubscribeEvent
@@ -38,7 +36,7 @@ public class EventManager {
 	}
 
 	@SubscribeEvent
-	public static void onPlayerTick(final TickEvent.PlayerTickEvent event) {
+	public static void onPlayerTick(final PlayerTickEvent event) {
 
 	}
 
@@ -59,7 +57,7 @@ public class EventManager {
 
 	@SubscribeEvent
 	public static void onLivingDrop(final LivingDropsEvent event) {
-
+		DeltaHardMode.LOGGER.info(event.getEntityLiving().getLastAttackedEntity());
 	}
 
 	@SubscribeEvent

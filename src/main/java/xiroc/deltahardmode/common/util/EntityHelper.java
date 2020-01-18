@@ -17,11 +17,11 @@ public final class EntityHelper {
 	}
 
 	public static void tagEntity(Entity entity) {
-		entity.getEntityData().putBoolean("deltahardmode_tagged", true);
+		entity.getPersistentData().putBoolean("deltahardmode_tagged", true);
 	}
 
 	public static boolean hasTag(Entity entity) {
-		return entity.getEntityData().contains("deltahardmode_tagged");
+		return entity.getPersistentData().contains("deltahardmode_tagged");
 	}
 	
 	public static final class AnimalHelper {
