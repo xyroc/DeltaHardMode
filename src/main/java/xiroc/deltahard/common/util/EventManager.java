@@ -127,26 +127,34 @@ public class EventManager {
 		ConfigCache.gravityBlocks.add(Blocks.DOUBLE_WOODEN_SLAB);
 		ConfigCache.gravityBlocks.add(Blocks.STONE_STAIRS);
 
-		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
-		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE).withProperty(BlockSlab.HALF, BlockSlab.EnumBlockHalf.TOP));
-		ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE));
-		ConfigCache.gravityStates.add(Blocks.STONEBRICK.getDefaultState().withProperty(BlockStoneBrick.VARIANT, BlockStoneBrick.EnumType.CRACKED));
-		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.ACACIA));
-		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.OAK));
-		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.JUNGLE));
-		ConfigCache.gravityStates.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE));
+		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
+				BlockStoneSlab.EnumType.COBBLESTONE));
+		ConfigCache.gravityStates.add(Blocks.STONE_SLAB.getDefaultState()
+				.withProperty(BlockStoneSlab.VARIANT, BlockStoneSlab.EnumType.COBBLESTONE)
+				.withProperty(BlockSlab.HALF, BlockSlab.EnumBlockHalf.TOP));
+		ConfigCache.gravityStates.add(Blocks.DOUBLE_STONE_SLAB.getDefaultState().withProperty(BlockStoneSlab.VARIANT,
+				BlockStoneSlab.EnumType.COBBLESTONE));
+		ConfigCache.gravityStates.add(Blocks.STONEBRICK.getDefaultState().withProperty(BlockStoneBrick.VARIANT,
+				BlockStoneBrick.EnumType.CRACKED));
+		ConfigCache.gravityStates
+				.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.ACACIA));
+		ConfigCache.gravityStates
+				.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.OAK));
+		ConfigCache.gravityStates
+				.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.JUNGLE));
+		ConfigCache.gravityStates
+				.add(Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE));
 
-		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.X));
-		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Y));
-		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Z));
-		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.X));
-		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Y));
-		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Z));
+//		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.X));
+//		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Y));
+//		ConfigCache.dropStates.add(Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.BIRCH).withProperty(BlockOldLog.LOG_AXIS, BlockLog.EnumAxis.Z));
+//		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.X));
+//		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Y));
+//		ConfigCache.dropStates.add(Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockNewLog.LOG_AXIS, BlockLog.EnumAxis.Z));
 	}
 
 	@SubscribeEvent
 	public void onRecipeRegistry(RegistryEvent.Register<IRecipe> event) {
-		ConfigHelper.loadConfig();
 		DeltaHard.logger.info("Modifying Recipes");
 		IForgeRegistryModifiable registry = (IForgeRegistryModifiable) event.getRegistry();
 		registry.remove(new ResourceLocation("minecraft:golden_carrot"));
@@ -157,24 +165,32 @@ public class EventManager {
 	public void loadloot(LootTableLoadEvent event) {
 		switch (event.getName().toString()) {
 		case "minecraft:chests/stronghold_corridor": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		case "minecraft:chests/stronghold_library": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.MAP, 1, 1, new LootFunction[] { new LootFunctionTreasureMap(new LootCondition[0]) }, new LootCondition[0], "deltahard:treasure_map") }, new LootCondition[0], new RandomValueRange(1), new RandomValueRange(0), "deltahard:treasure_map_pool"));
+			event.getTable()
+					.addPool(new LootPool(
+							new LootEntry[] { new LootEntryItem(Items.MAP, 1, 1,
+									new LootFunction[] { new LootFunctionTreasureMap(new LootCondition[0]) },
+									new LootCondition[0], "deltahard:treasure_map") },
+							new LootCondition[0], new RandomValueRange(1), new RandomValueRange(0),
+							"deltahard:treasure_map_pool"));
 			break;
 		}
 		case "minecraft:chests/stronghold_crossing": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			// event.getTable().addPool(new LootPool(new LootEntry[] { new
 			// LootEntryItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 5, 1, new
 			// LootFunction[] { new LootFunctionBase(new LootCondition[0], 1, 5) }, new
@@ -183,47 +199,64 @@ public class EventManager {
 			break;
 		}
 		case "minecraft:chests/simple_dungeon": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		case "minecraft:chests/nether_bridge": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		case "minecraft:chests/abandoned_mineshaft": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
-			event.getTable().addPool(new LootPool(new LootEntry[] { new LootEntryItem(Items.WHEAT_SEEDS, 1, 1, new LootFunction[0], new LootCondition[0], "deltahard:wheat_seeds"), new LootEntryItem(Item.getItemFromBlock(Blocks.SAPLING), 1, 1, new LootFunction[] { new LootFunctionSaplings(new LootCondition[0]) }, new LootCondition[0], "deltahard:sapling") }, new LootCondition[0], new RandomValueRange(1, 8), new RandomValueRange(0, 3), "deltahard:loot_pool_seeds_and_saplings"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable()
+					.addPool(
+							new LootPool(
+									new LootEntry[] {
+											new LootEntryItem(Items.WHEAT_SEEDS, 1, 1, new LootFunction[0],
+													new LootCondition[0], "deltahard:wheat_seeds"),
+											new LootEntryItem(Item.getItemFromBlock(Blocks.SAPLING), 1, 1,
+													new LootFunction[] {
+															new LootFunctionSaplings(new LootCondition[0]) },
+													new LootCondition[0], "deltahard:sapling") },
+									new LootCondition[0], new RandomValueRange(1, 8), new RandomValueRange(0, 3),
+									"deltahard:loot_pool_seeds_and_saplings"));
 			break;
 		}
 		case "minecraft:chests/jungle_temple": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		case "minecraft:chests/desert_pyramid": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		case "minecraft:chests/village_blacksmith": {
-			if (!ConfigHelper.getProperty("LOOT"))
+			if (!Config.getProperty("LOOT"))
 				return;
 			DeltaHard.logger.info("Modifying LootTable: " + event.getName().toString());
 			event.getTable().getPool("main").removeEntry("minecraft:obsidian");
-			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0], new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
+			event.getTable().addPool(new LootPoolItem(Item.getItemFromBlock(Blocks.OBSIDIAN), 3, 5, new LootEntry[0],
+					new LootCondition[0], new RandomValueRange(0), new RandomValueRange(0), "deltahard:obsidian"));
 			break;
 		}
 		}
@@ -233,7 +266,7 @@ public class EventManager {
 	public void onBonemeal(BonemealEvent event) {
 		if (!(event.getBlock().getBlock() instanceof BlockCrops))
 			return;
-		if (!ConfigHelper.getProperty("CHANGE_BONEMEAL"))
+		if (!Config.getProperty("CHANGE_BONEMEAL"))
 			return;
 		event.setCanceled(true);
 		IBlockState iblockstate = event.getBlock();
@@ -262,7 +295,7 @@ public class EventManager {
 	public void onPlayerTick(PlayerTickEvent event) {
 		if (event.player.world.isRemote)
 			return;
-		if (event.player.getSleepTimer() >= 80 && ConfigHelper.getProperty("NO_SLEEP")) {
+		if (event.player.isPlayerFullyAsleep() && Config.getProperty("NO_SLEEP")) {
 			event.player.wakeUpPlayer(true, false, true);
 			event.player.sendStatusMessage(new TextComponentString("I cant sleep now..."), true);
 		}
@@ -270,16 +303,17 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-		if (event.getItemStack().getItem() == Items.BUCKET && ConfigHelper.getProperty("NO_OBSIDIAN")) {
+		if (event.getItemStack().getItem() == Items.BUCKET && Config.getProperty("NO_OBSIDIAN")) {
 			RayTraceResult raytraceresult = RayTrace.rayTrace(event.getWorld(), event.getEntityPlayer(), true);
-			if (raytraceresult != null && event.getWorld().getBlockState(raytraceresult.getBlockPos()).getMaterial() == Material.LAVA)
+			if (raytraceresult != null
+					&& event.getWorld().getBlockState(raytraceresult.getBlockPos()).getMaterial() == Material.LAVA)
 				event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent
 	public void onBlock(RegistryEvent.Register<Block> event) {
-		if (ConfigHelper.getProperty("NO_OBSIDIAN"))
+		if (Config.getProperty("NO_OBSIDIAN"))
 			Blocks.OBSIDIAN.setHarvestLevel("pickaxe", 5);
 	}
 
@@ -288,23 +322,33 @@ public class EventManager {
 		if (event.getWorld().isRemote)
 			return;
 		// Hardcoded Stuff dont do this at home
-		if (ConfigCache.dropStates.contains(event.getState())) {
+//		if (ConfigCache.dropStates.contains(event.getState())) {
+//			Iterator<ItemStack> iterator = event.getDrops().iterator();
+//			while (iterator.hasNext()) {
+//				ItemStack item = iterator.next();
+//				if (Config.getProperty("GRAVITY") && (item.getItemDamage() == BlockPlanks.EnumType.BIRCH.getMetadata() || item.getItemDamage() == BlockPlanks.EnumType.DARK_OAK.getMetadata() - 4))
+//					iterator.remove();
+//				return;
+//			}
+//		}
+//		if (ConfigCache.dropBlocks.contains(event.getState().getBlock().getRegistryName().toString())) {
+//			Iterator<ItemStack> iterator = event.getDrops().iterator();
+//			while (iterator.hasNext()) {
+//				ItemStack item = iterator.next();
+//				if (ConfigCache.removedDrops.contains(item.getItem().getRegistryName().toString())) {
+//					iterator.remove();
+//					return;
+//				}
+//			}
+//		}
+		if (ConfigCache.bannedDrops.containsKey(event.getState())) {
+			Item[] bans = ConfigCache.bannedDrops.get(event.getState());
 			Iterator<ItemStack> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
-				ItemStack item = iterator.next();
-				if (item.getItemDamage() == BlockPlanks.EnumType.BIRCH.getMetadata() || item.getItemDamage() == BlockPlanks.EnumType.DARK_OAK.getMetadata() - 4)
-					iterator.remove();
-				return;
-			}
-		}
-		if (ConfigCache.dropBlocks.contains(event.getState().getBlock().getRegistryName().toString())) {
-			Iterator<ItemStack> iterator = event.getDrops().iterator();
-			while (iterator.hasNext()) {
-				ItemStack item = iterator.next();
-				if (ConfigCache.removedDrops.contains(item.getItem().getRegistryName().toString())) {
-					iterator.remove();
-				}
-				return;
+				ItemStack stack = iterator.next();
+				for (Item ban : bans)
+					if (stack.getItem() == ban)
+						iterator.remove();
 			}
 		}
 	}
@@ -313,7 +357,7 @@ public class EventManager {
 	public void onNeighborChange(BlockEvent.NeighborNotifyEvent event) {
 		if (!event.getWorld().getChunkFromBlockCoords(event.getPos()).wasTicked())
 			return;
-		if (!ConfigHelper.getProperty("GRAVITY"))
+		if (!Config.getProperty("GRAVITY"))
 			return;
 		event.getWorld().scheduleUpdate(event.getPos(), event.getState().getBlock(), 4);
 		FallingBlockHelper.checkFallable(event.getWorld(), event.getPos());
@@ -324,7 +368,7 @@ public class EventManager {
 	public void onBlockAdded(BlockEvent.PlaceEvent event) {
 		if (!event.getWorld().getChunkFromBlockCoords(event.getPos()).wasTicked())
 			return;
-		if (event.getWorld().isRemote || !ConfigHelper.getProperty("GRAVITY"))
+		if (event.getWorld().isRemote || !Config.getProperty("GRAVITY"))
 			return;
 		event.getWorld().scheduleUpdate(event.getPos(), event.getState().getBlock(), 4);
 		FallingBlockHelper.checkFallable(event.getWorld(), event.getPos());
@@ -336,10 +380,12 @@ public class EventManager {
 		EntityLivingBase entity = event.getEntityLiving();
 		if (entity instanceof EntityCow) {
 			if (!containsEntityItem(event.getDrops().iterator(), Items.LEATHER))
-				event.getDrops().add(new EntityItem(entity.getEntityWorld(), entity.posX, entity.posY, entity.posZ, new ItemStack(Items.LEATHER)));
+				event.getDrops().add(new EntityItem(entity.getEntityWorld(), entity.posX, entity.posY, entity.posZ,
+						new ItemStack(Items.LEATHER)));
 			return;
 		}
-		if ((entity instanceof EntitySkeleton || entity instanceof EntityStray) && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP")) {
+		if ((entity instanceof EntitySkeleton || entity instanceof EntityStray)
+				&& Config.getProperty("SKELETON_NO_BOW_DROP")) {
 			Iterator<EntityItem> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				EntityItem item = iterator.next();
@@ -348,7 +394,7 @@ public class EventManager {
 			}
 			return;
 		}
-		if (entity instanceof EntitySpider && ConfigHelper.getProperty("SPIDER_NO_STRING_DROP")) {
+		if (entity instanceof EntitySpider && Config.getProperty("SPIDER_NO_STRING_DROP")) {
 			Iterator<EntityItem> iterator = event.getDrops().iterator();
 			while (iterator.hasNext()) {
 				EntityItem item = iterator.next();
@@ -363,7 +409,20 @@ public class EventManager {
 				EntityItem item = iterator.next();
 				if (item.getItem().getItem() == Items.ENDER_PEARL) {
 					int count = item.getItem().getCount();
-					item.setItem(new ItemStack(item.getItem().getItem(), count >= 16 ? count : count + entity.world.rand.nextInt(2)));
+					item.setItem(new ItemStack(item.getItem().getItem(),
+							count >= 16 ? count : count + entity.world.rand.nextInt(2)));
+				}
+			}
+			return;
+		}
+		if (entity instanceof EntityBlaze) {
+			Iterator<EntityItem> iterator = event.getDrops().iterator();
+			while (iterator.hasNext()) {
+				EntityItem item = iterator.next();
+				if (item.getItem().getItem() == Items.BLAZE_ROD) {
+					int count = item.getItem().getCount();
+					item.setItem(new ItemStack(item.getItem().getItem(),
+							count >= 16 ? count : count + entity.world.rand.nextInt(2)));
 				}
 			}
 			return;
@@ -378,8 +437,12 @@ public class EventManager {
 			fireball.setDead();
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
-				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX,
+						fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(
+						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing,
+								explosion.getAffectedBlockPositions()),
+						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			return;
 		}
@@ -395,8 +458,12 @@ public class EventManager {
 			fireball.setDead();
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
-				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
+						fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(
+						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing,
+								explosion.getAffectedBlockPositions()),
+						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			return;
 		}
@@ -412,30 +479,41 @@ public class EventManager {
 			fireball.setDead();
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
-				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
+						fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
+				DeltaHard.NET.sendToAllAround(
+						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing,
+								explosion.getAffectedBlockPositions()),
+						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
 			}
 			return;
 		}
-		if (event.getEntity() instanceof EntityDragonFireball && !(event.getRayTraceResult().entityHit instanceof EntityDragon)) {
+		if (event.getEntity() instanceof EntityDragonFireball
+				&& !(event.getRayTraceResult().entityHit instanceof EntityDragon)) {
 			EntityDragonFireball fireball = (EntityDragonFireball) event.getEntity();
 			if (!fireball.world.isRemote && !fireball.isDead) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(), fireball.posX, fireball.posY, fireball.posZ, 1F, false, mobGriefing);
-				DeltaHard.NET.sendToAllAround(new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
+						fireball.posX, fireball.posY, fireball.posZ, 1.3F, false, mobGriefing);
+				DeltaHard.NET.sendToAllAround(
+						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 1.3F, mobGriefing,
+								explosion.getAffectedBlockPositions()),
+						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
+				fireball.setDead();
 			}
-			fireball.setDead();
 		}
 	}
 
 	@SubscribeEvent
 	public void onDamage(LivingDamageEvent event) {
 		EntityLivingBase entity = event.getEntityLiving();
-		if ((entity instanceof EntitySpider || entity instanceof EntitySlime) && event.getSource() == DamageSource.FALL) {
+		if ((entity instanceof EntitySpider || entity instanceof EntitySlime)
+				&& event.getSource() == DamageSource.FALL) {
 			event.setCanceled(true);
 			return;
 		}
-		if (entity instanceof EntityPlayer && event.getSource() instanceof EntityDamageSource && ((EntityDamageSource) event.getSource()).getTrueSource() instanceof EntityBlaze) {
+		if (entity instanceof EntityPlayer && event.getSource() instanceof EntityDamageSource
+				&& ((EntityDamageSource) event.getSource()).getTrueSource() instanceof EntityBlaze) {
 			entity.setFire(4);
 			return;
 		}
@@ -450,8 +528,12 @@ public class EventManager {
 		if (entity instanceof EntityCreeper) {
 			event.setCanceled(true);
 			EntityCreeper creeper = (EntityCreeper) entity;
-			Explosion explosion = ExplosionHelper.newExplosion(creeper, event.getWorld(), creeper.posX, creeper.posY, creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, mobGriefing);
-			DeltaHard.NET.sendToAllAround(new PacketClientExplosion(creeper.posX, creeper.posY, creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(creeper.dimension, creeper.posX, creeper.posY, creeper.posZ, 64.0D));
+			Explosion explosion = ExplosionHelper.newExplosion(creeper, event.getWorld(), creeper.posX, creeper.posY,
+					creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, mobGriefing);
+			DeltaHard.NET.sendToAllAround(
+					new PacketClientExplosion(creeper.posX, creeper.posY, creeper.posZ,
+							3 * (creeper.getPowered() ? 2 : 1), mobGriefing, explosion.getAffectedBlockPositions()),
+					new TargetPoint(creeper.dimension, creeper.posX, creeper.posY, creeper.posZ, 64.0D));
 			ExplosionHelper.spawnLingeringCloud(creeper);
 			entity.setDead();
 			return;
@@ -459,8 +541,12 @@ public class EventManager {
 		if (entity instanceof EntityWither) {
 			event.setCanceled(true);
 			EntityWither wither = (EntityWither) entity;
-			Explosion explosion = ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY, entity.posZ, 10, false, mobGriefing);
-			DeltaHard.NET.sendToAllAround(new PacketClientExplosion(wither.posX, wither.posY, wither.posZ, 10, mobGriefing, explosion.getAffectedBlockPositions()), new TargetPoint(wither.dimension, wither.posX, wither.posY, wither.posZ, 64.0D));
+			Explosion explosion = ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY,
+					entity.posZ, 10, false, mobGriefing);
+			DeltaHard.NET.sendToAllAround(
+					new PacketClientExplosion(wither.posX, wither.posY, wither.posZ, 10, mobGriefing,
+							explosion.getAffectedBlockPositions()),
+					new TargetPoint(wither.dimension, wither.posX, wither.posY, wither.posZ, 64.0D));
 			return;
 		}
 	}
@@ -531,7 +617,10 @@ public class EventManager {
 				return;
 			}
 			if (entity.dimension == 0) {
-				if (!(entity.world.getBiome(entity.getPosition()) == Biomes.ICE_MOUNTAINS || entity.world.getBiome(entity.getPosition()) == Biomes.ICE_PLAINS || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_OCEAN || entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_RIVER)) {
+				if (!(entity.world.getBiome(entity.getPosition()) == Biomes.ICE_MOUNTAINS
+						|| entity.world.getBiome(entity.getPosition()) == Biomes.ICE_PLAINS
+						|| entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_OCEAN
+						|| entity.world.getBiome(entity.getPosition()) == Biomes.FROZEN_RIVER)) {
 					if (entity.world.rand.nextFloat() <= 0.07) {
 						EntityStray stray = new EntityStray(entity.world);
 						stray.setPosition(entity.posX, entity.posY, entity.posZ);
@@ -565,7 +654,8 @@ public class EventManager {
 			EntitySpider spider = (EntitySpider) entity;
 			spider.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35D);
 			if (entity.world.rand.nextFloat() <= 0.06 && !entity.isBeingRidden()) {
-				EntityLiving entityskeleton = (entity.world.rand.nextFloat() > 0.09) ? new EntitySkeleton(entity.world) : new EntityStray(entity.world);
+				EntityLiving entityskeleton = (entity.world.rand.nextFloat() > 0.09) ? new EntitySkeleton(entity.world)
+						: new EntityStray(entity.world);
 				entityskeleton.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, 0.0F);
 				entityskeleton.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.BOW));
 				tagEntity(entityskeleton);
@@ -593,7 +683,8 @@ public class EventManager {
 			if (!zombie.isChild()) {
 				zombie.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.27);
 			}
-			if (entity.world.rand.nextFloat() <= 0.19 && !(entity.world.getBiome(entity.getPosition()) == Biomes.DESERT || entity.world.getBiome(entity.getPosition()) == Biomes.DESERT_HILLS)) {
+			if (entity.world.rand.nextFloat() <= 0.19 && !(entity.world.getBiome(entity.getPosition()) == Biomes.DESERT
+					|| entity.world.getBiome(entity.getPosition()) == Biomes.DESERT_HILLS)) {
 				EntityHusk husk = new EntityHusk(entity.world);
 				husk.setPosition(entity.posX, entity.posY, entity.posZ);
 				entity.world.spawnEntity(husk);
@@ -630,13 +721,13 @@ public class EventManager {
 		if (entity instanceof EntityWither) {
 			EntityWither wither = (EntityWither) entity;
 			wither.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.65D);
-			wither.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(400.0D);
+			wither.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(350.0D);
 			wither.setHealth(wither.getMaxHealth());
 			return;
 		}
 		if (entity instanceof EntityDragon) {
 			EntityDragon dragon = (EntityDragon) entity;
-			dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(300.0D);
+			dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(250.0D);
 			dragon.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(7.5);
 			dragon.setHealth(dragon.getMaxHealth());
 			return;
@@ -664,7 +755,7 @@ public class EventManager {
 			return;
 		if (event.getEntityPlayer().getEntityWorld().provider.getDimension() != 0)
 			return;
-		if (!ConfigHelper.getProperty("NO_SLEEP"))
+		if (!Config.getProperty("NO_SLEEP"))
 			return;
 		// event.setResult(SleepResult.OTHER_PROBLEM);
 		// event.getEntityPlayer().setSpawnPoint(event.getEntityPlayer().getPosition(),
@@ -675,28 +766,12 @@ public class EventManager {
 	public void onInteract(PlayerInteractEvent.EntityInteract event) {
 		if (event.getTarget() instanceof EntityAnimal) {
 			event.setCancellationResult(EnumActionResult.SUCCESS);
-			if (AnimalHelper.interact((EntityAnimal) event.getTarget(), event.getEntityPlayer(), event.getItemStack())) {
+			if (AnimalHelper.interact((EntityAnimal) event.getTarget(), event.getEntityPlayer(),
+					event.getItemStack())) {
 				event.setCanceled(true);
 			}
 		}
 	}
-
-	/*
-	 * @SubscribeEvent public void onInteract(PlayerInteractEvent.RightClickItem
-	 * event) { }
-	 * 
-	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Start
-	 * event) { }
-	 * 
-	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Stop
-	 * event) { }
-	 * 
-	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Tick
-	 * event) { }
-	 * 
-	 * @SubscribeEvent public void onItemUseStart(LivingEntityUseItemEvent.Finish
-	 * event) { }
-	 */
 
 	private static boolean containsEntityItem(Iterator<EntityItem> iterator, Item item) {
 		while (iterator.hasNext()) {

@@ -1,8 +1,7 @@
 package xiroc.deltahard.common.util;
 
+import java.io.InputStreamReader;
 import java.net.URL;
-
-import org.jline.utils.InputStreamReader;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +15,7 @@ public class Reference {
 	public static final String NAME = "DeltaHard";
 	public static final String MODID = "deltahard";
 	public static final String VERSION = "beta";
-	public static final String VERSION_STRING = "0.5.6";
+	public static final String VERSION_STRING = "0.5.9";
 	public static final String AUTHOR = TextFormatting.GREEN + "XIROC";
 	public static final String CREDITS = "Idea by " + TextFormatting.GREEN + "ladallas_texas";
 	public static final String MINECRAFTVERSIONS = "[1.12],[1.12.1],[1.12.2]";

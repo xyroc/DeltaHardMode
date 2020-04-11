@@ -7,7 +7,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
 import xiroc.deltahard.DeltaHard;
 
-public class ConfigHelper {
+public class Config {
 
 	private static Configuration config;
 
