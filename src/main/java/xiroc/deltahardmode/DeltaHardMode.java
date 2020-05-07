@@ -31,7 +31,7 @@ public class DeltaHardMode {
 	public static final String MODID = "deltahardmode";
 	public static final Logger LOGGER = LogManager.getLogger();
 
-	public static final boolean OBFUSCATED_VALUES = false;
+	public static final boolean OBFUSCATED_VALUES = true;
 
 	public DeltaHardMode() {
 		LOGGER.info("Challenge awaits...");

@@ -147,7 +147,7 @@ public class EventManager {
 		if (event.player.world.isRemote)
 			return;
 		if (event.player.getSleepTimer() >= 80 /* && ConfigHelper.getProperty("NO_SLEEP") */) {
-			event.player.wakeUpPlayer(true, false, true);
+			event.player.wakeUp();
 			event.player.sendStatusMessage(new StringTextComponent("I cant sleep now..."), true);
 		}
 	}
@@ -196,7 +196,7 @@ public class EventManager {
 		LivingEntity entity = event.getEntityLiving();
 		if (entity instanceof CowEntity) {
 			if (!containsEntityItem(event.getDrops().iterator(), Items.LEATHER))
-				event.getDrops().add(new ItemEntity(entity.getEntityWorld(), entity.posX, entity.posY, entity.posZ,
+				event.getDrops().add(new ItemEntity(entity.getEntityWorld(), entity.getPosX(), entity.getPosY(), entity.getPosZ(),
 						new ItemStack(Items.LEATHER)));
 			return;
 		}
@@ -253,7 +253,7 @@ public class EventManager {
 			if (!fireball.world.isRemote) {
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
 
-				fireball.world.createExplosion(null, fireball.posX, fireball.posY, fireball.posZ,
+				fireball.world.createExplosion(null, fireball.getPosX(), fireball.getPosY(), fireball.getPosZ(),
 						fireball.explosionPower, true, mobGriefing ? Mode.DESTROY : Mode.NONE);
 
 				DeltaHardMode.LOGGER.debug("Fireball {} {} {}", fireball.serverPosX, fireball.serverPosY,
@@ -281,7 +281,7 @@ public class EventManager {
 
 				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
 
-				fireball.world.createExplosion(null, fireball.posX, fireball.posY, fireball.posZ,
+				fireball.world.createExplosion(null, fireball.getPosX(), fireball.getPosY(), fireball.getPosZ(),
 						fireball.explosionPower, true, mobGriefing ? Mode.DESTROY : Mode.NONE);
 
 				fireball.remove();
@@ -305,7 +305,7 @@ public class EventManager {
 
 			boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
 
-			fireball.world.createExplosion(fireball, fireball.posX, fireball.posY, fireball.posZ, 1.3F,
+			fireball.world.createExplosion(fireball, fireball.getPosX(), fireball.getPosY(), fireball.getPosZ(), 1.3F,
 					mobGriefing ? Mode.DESTROY : Mode.NONE);
 
 			fireball.remove();
@@ -397,7 +397,7 @@ public class EventManager {
 		if (entity instanceof ZombiePigmanEntity) {
 			if (entity.world.rand.nextFloat() <= 0.05) {
 				CreeperEntity creeper = new CreeperEntity(EntityType.CREEPER, entity.world);
-				creeper.setPosition(entity.posX, entity.posY, entity.posZ);
+				creeper.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				tagEntity(creeper);
 				entity.world.addEntity(creeper);
 				entity.remove();
@@ -412,7 +412,7 @@ public class EventManager {
 		if (entity instanceof SquidEntity) {
 			if (entity.world.rand.nextFloat() <= 0.07) {
 				GuardianEntity guardian = new GuardianEntity(EntityType.GUARDIAN, entity.world);
-				guardian.setPosition(entity.posX, entity.posY, entity.posZ);
+				guardian.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				tagEntity(guardian);
 				entity.world.addEntity(guardian);
 				entity.remove();
@@ -421,7 +421,7 @@ public class EventManager {
 		if (entity instanceof StrayEntity) {
 			if (entity.dimension == DimensionType.THE_NETHER) {
 				WitherSkeletonEntity skeleton = new WitherSkeletonEntity(EntityType.WITHER_SKELETON, entity.world);
-				skeleton.setPosition(entity.posX, entity.posY, entity.posZ);
+				skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
 				entity.world.addEntity(skeleton);
 				tagEntity(skeleton);
@@ -432,7 +432,7 @@ public class EventManager {
 		if (entity instanceof SkeletonEntity) {
 			if (entity.dimension == DimensionType.THE_NETHER) {
 				WitherSkeletonEntity skeleton = new WitherSkeletonEntity(EntityType.WITHER_SKELETON, entity.world);
-				skeleton.setPosition(entity.posX, entity.posY, entity.posZ);
+				skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
 				entity.world.addEntity(skeleton);
 				tagEntity(skeleton);
@@ -443,7 +443,7 @@ public class EventManager {
 				if (!ICE_BIOMES.contains(entity.world.getBiome(entity.getPosition()))) {
 					if (entity.world.rand.nextFloat() <= 0.07) {
 						StrayEntity stray = new StrayEntity(EntityType.STRAY, entity.world);
-						stray.setPosition(entity.posX, entity.posY, entity.posZ);
+						stray.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 						stray.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
 						entity.world.addEntity(stray);
 						tagEntity(stray);
@@ -463,7 +463,7 @@ public class EventManager {
 		if (entity instanceof VindicatorEntity) {
 			if (entity.world.rand.nextFloat() <= 0.09) {
 				IllusionerEntity illusionIllager = new IllusionerEntity(EntityType.ILLUSIONER, entity.world);
-				illusionIllager.setPosition(entity.posX, entity.posY, entity.posZ);
+				illusionIllager.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				tagEntity(illusionIllager);
 				entity.world.addEntity(illusionIllager);
 				entity.remove();
@@ -477,7 +477,7 @@ public class EventManager {
 				LivingEntity entityskeleton = (entity.world.rand.nextFloat() > 0.09)
 						? new SkeletonEntity(EntityType.SKELETON, entity.world)
 						: new StrayEntity(EntityType.STRAY, entity.world);
-				entityskeleton.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, 0.0F);
+				entityskeleton.setLocationAndAngles(entity.getPosX(), entity.getPosY(), entity.getPosZ(), entity.rotationYaw, 0.0F);
 				entityskeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
 				tagEntity(entityskeleton);
 				entity.world.addEntity(entityskeleton);
@@ -506,7 +506,7 @@ public class EventManager {
 			if (entity.world.rand.nextFloat() <= 0.19 && !(entity.world.getBiome(entity.getPosition()) == Biomes.DESERT
 					|| entity.world.getBiome(entity.getPosition()) == Biomes.DESERT_HILLS)) {
 				HuskEntity husk = new HuskEntity(EntityType.HUSK, entity.world);
-				husk.setPosition(entity.posX, entity.posY, entity.posZ);
+				husk.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 				entity.world.addEntity(husk);
 				entity.remove();
 				entity = husk;
@@ -560,7 +560,7 @@ public class EventManager {
 			if (entity instanceof EndermanEntity) {
 				for (int i = 0; i < entity.world.rand.nextInt(3); i++) {
 					EndermiteEntity endermite = new EndermiteEntity(EntityType.ENDERMITE, entity.world);
-					endermite.setPosition(entity.posX, entity.posY, entity.posZ);
+					endermite.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
 					tagEntity(endermite);
 					entity.world.addEntity(endermite);
 				}
