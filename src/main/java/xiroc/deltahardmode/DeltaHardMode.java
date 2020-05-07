@@ -20,6 +20,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import xiroc.deltahardmode.common.util.ConfigCache;
 import xiroc.deltahardmode.common.util.EventManager;
 
+/*
+ * Delta Hard Mode - 1.0.0
+ * May 07 2020
+ */
+
 @Mod(DeltaHardMode.MODID)
 public class DeltaHardMode {
 

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import com.google.common.collect.Lists;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -39,6 +40,9 @@ import net.minecraft.entity.monster.ZombiePigmanEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.SquidEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.DragonFireballEntity;
+import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,21 +50,34 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.Explosion.Mode;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.loot.ItemLootEntry;
+import net.minecraft.world.storage.loot.LootPool;
+import net.minecraft.world.storage.loot.RandomValueRange;
+import net.minecraft.world.storage.loot.functions.SetCount;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -73,6 +90,28 @@ public class EventManager {
 	private static final ArrayList<Biome> ICE_BIOMES = Lists.newArrayList(Biomes.ICE_SPIKES, Biomes.SNOWY_BEACH,
 			Biomes.SNOWY_MOUNTAINS, Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA_HILLS, Biomes.SNOWY_TAIGA_MOUNTAINS,
 			Biomes.SNOWY_TUNDRA, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN, Biomes.FROZEN_RIVER);
+
+	@SubscribeEvent
+	public void onLootTableLoad(LootTableLoadEvent event) {
+		DeltaHardMode.LOGGER.debug(event.getName().toString());
+		switch (event.getName().toString()) {
+		case "minecraft:chests/village/village_toolsmith":
+			event.getTable()
+					.addPool(LootPool.builder().name("deltahardmode:obsidian").addEntry(ItemLootEntry
+							.builder(Blocks.OBSIDIAN).acceptFunction(SetCount.builder(new RandomValueRange(1, 5))))
+							.build());
+			break;
+		case "minecraft:chests/abandoned_mineshaft":
+			event.getTable()
+					.addPool(LootPool.builder().name("deltahardmode:chest_minecart")
+							.addEntry(ItemLootEntry.builder(Items.WHEAT_SEEDS)
+									.acceptFunction(SetCount.builder(new RandomValueRange(1, 12))).weight(3))
+							.addEntry(ItemLootEntry.builder(Blocks.OAK_SAPLING)
+									.acceptFunction(SetCount.builder(new RandomValueRange(1, 8))).weight(2))
+							.build());
+			break;
+		}
+	}
 
 	@SubscribeEvent
 	public void onBonemeal(BonemealEvent event) {
@@ -131,7 +170,7 @@ public class EventManager {
 		ServerWorld server = (ServerWorld) event.getWorld();
 		if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
 			return;
-		DeltaHardMode.LOGGER.debug("NeighborChange: {}", event.getPos());
+//		DeltaHardMode.LOGGER.debug("NeighborChange: {}", event.getPos());
 		event.getWorld().getBlockState(event.getPos()).updateNeighbors(event.getWorld(), event.getPos(), 4);
 		FallingBlockHelper.checkFallable(event.getWorld().getWorld(), event.getPos());
 		FallingBlockHelper.updateNeighbors(event.getWorld().getWorld(), event.getPos());
@@ -140,12 +179,13 @@ public class EventManager {
 //
 	@SubscribeEvent
 	public void onBlockAdded(BlockEvent.EntityPlaceEvent event) {
-		if (event.getWorld().isRemote() || !ConfigHelper.getProperty("gravity") || !(event.getWorld() instanceof ServerWorld))
+		if (event.getWorld().isRemote() || !ConfigHelper.getProperty("gravity")
+				|| !(event.getWorld() instanceof ServerWorld))
 			return;
 		ServerWorld server = (ServerWorld) event.getWorld();
 		if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
 			return;
-		DeltaHardMode.LOGGER.debug("Checking if fallable: {}", event.getPos());
+//		DeltaHardMode.LOGGER.debug("Checking if fallable: {}", event.getPos());
 		event.getWorld().getBlockState(event.getPos()).updateNeighbors(event.getWorld(), event.getPos(), 4);
 		FallingBlockHelper.checkFallable(event.getWorld().getWorld(), event.getPos());
 		FallingBlockHelper.updateNeighbors(event.getWorld().getWorld(), event.getPos());
@@ -205,135 +245,91 @@ public class EventManager {
 		}
 	}
 
-//	@SubscribeEvent
-//	public void onAttack(AttackEntityEvent event) {
-//		if (event.getTarget() instanceof FireballEntity) {
-//			FireballEntity fireball = (FireballEntity) event.getTarget();
-//			event.setCanceled(true);
-//			fireball.remove();
-//			if (!fireball.world.isRemote) {
-//				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
-//				Explosion explosion = ExplosionHelper.newExplosion(fireball, fireball.getEntityWorld(), fireball.posX,
-//						fireball.posY, fireball.posZ, 2, mobGriefing, mobGriefing);
-//				for (Entity e : fireball.world
-//						.getEntitiesWithinAABB(
-//								EntityType.PLAYER, new AxisAlignedBB(fireball.posX - 32, fireball.posY - 32,
-//										fireball.posZ - 32, fireball.posX + 32, fireball.posY + 32, fireball.posZ + 32),
-//								(t) -> true)) {
-//					ServerPlayerEntity player = (ServerPlayerEntity) e;
-//					DeltaHardMode.CHANNEL.send(!?, new PacketClientExplosion(x, y, z, size, terrainDamage, affectedBlockPositions));
-//				}
-//			}
-//			return;
-//		}
-//	}
+	@SubscribeEvent
+	public void onAttack(AttackEntityEvent event) {
+		if (event.getTarget() instanceof FireballEntity) {
+			FireballEntity fireball = (FireballEntity) event.getTarget();
+			event.setCanceled(true);
+			if (!fireball.world.isRemote) {
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
 
-//	@SubscribeEvent
-//	public void onArrowImpact(ProjectileImpactEvent.Arrow event) {
-//		if (event.getEntity().world.isRemote)
-//			return;
-//		if (event.getRayTraceResult().entityHit instanceof EntityLargeFireball) {
-//			EntityLargeFireball fireball = (EntityLargeFireball) event.getRayTraceResult().entityHit;
-//			event.setCanceled(true);
-//			fireball.setDead();
-//			if (!fireball.world.isRemote) {
-//				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-//				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
-//						fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
-//				DeltaHard.NET.sendToAllAround(
-//						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing,
-//								explosion.getAffectedBlockPositions()),
-//						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
-//			}
-//			return;
-//		}
-//	}
-//
-//	@SubscribeEvent
-//	public void onFireballImpact(ProjectileImpactEvent.Fireball event) {
-//		if (event.getEntity().world.isRemote)
-//			return;
-//		if (event.getEntity() instanceof EntityLargeFireball) {
-//			EntityLargeFireball fireball = (EntityLargeFireball) event.getEntity();
-//			// event.setCanceled(true);
-//			fireball.setDead();
-//			if (!fireball.world.isRemote) {
-//				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-//				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
-//						fireball.posX, fireball.posY, fireball.posZ, 1.5F, mobGriefing, mobGriefing);
-//				DeltaHard.NET.sendToAllAround(
-//						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 2, mobGriefing,
-//								explosion.getAffectedBlockPositions()),
-//						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
-//			}
-//			return;
-//		}
-//		if (event.getEntity() instanceof EntityDragonFireball
-//				&& !(event.getRayTraceResult().entityHit instanceof EntityDragon)) {
-//			EntityDragonFireball fireball = (EntityDragonFireball) event.getEntity();
-//			if (!fireball.world.isRemote && !fireball.isDead) {
-//				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-//				Explosion explosion = ExplosionHelper.newExplosion(fireball.shootingEntity, fireball.getEntityWorld(),
-//						fireball.posX, fireball.posY, fireball.posZ, 1.3F, false, mobGriefing);
-//				DeltaHard.NET.sendToAllAround(
-//						new PacketClientExplosion(fireball.posX, fireball.posY, fireball.posZ, 1.3F, mobGriefing,
-//								explosion.getAffectedBlockPositions()),
-//						new TargetPoint(fireball.dimension, fireball.posX, fireball.posY, fireball.posZ, 64.0D));
-//				fireball.setDead();
-//			}
-//		}
-//	}
-//
-//	@SubscribeEvent
-//	public void onDamage(LivingDamageEvent event) {
-//		EntityLivingBase entity = event.getEntityLiving();
-//		if ((entity instanceof EntitySpider || entity instanceof EntitySlime)
-//				&& event.getSource() == DamageSource.FALL) {
-//			event.setCanceled(true);
-//			return;
-//		}
-//		if (entity instanceof EntityPlayer && event.getSource() instanceof EntityDamageSource
-//				&& ((EntityDamageSource) event.getSource()).getTrueSource() instanceof EntityBlaze) {
-//			entity.setFire(4);
-//			return;
-//		}
-//	}
-//
-//	@SubscribeEvent
-//	public void onExplosionStart(ExplosionEvent.Start event) {
-//		EntityLivingBase entity = event.getExplosion().getExplosivePlacedBy();
-//		if (entity == null)
-//			return;
-//		boolean mobGriefing = entity.getEntityWorld().getGameRules().getBoolean("mobGriefing");
-//		if (entity instanceof EntityCreeper) {
-//			event.setCanceled(true);
-//			EntityCreeper creeper = (EntityCreeper) entity;
-//			Explosion explosion = ExplosionHelper.newExplosion(creeper, event.getWorld(), creeper.posX, creeper.posY,
-//					creeper.posZ, 3 * (creeper.getPowered() ? 2 : 1), mobGriefing, mobGriefing);
-//			DeltaHard.NET.sendToAllAround(
-//					new PacketClientExplosion(creeper.posX, creeper.posY, creeper.posZ,
-//							3 * (creeper.getPowered() ? 2 : 1), mobGriefing, explosion.getAffectedBlockPositions()),
-//					new TargetPoint(creeper.dimension, creeper.posX, creeper.posY, creeper.posZ, 64.0D));
-//			ExplosionHelper.spawnLingeringCloud(creeper);
-//			entity.setDead();
-//			return;
-//		}
-//		if (entity instanceof EntityWither) {
-//			event.setCanceled(true);
-//			EntityWither wither = (EntityWither) entity;
-//			Explosion explosion = ExplosionHelper.newExplosion(entity, event.getWorld(), entity.posX, entity.posY,
-//					entity.posZ, 10, false, mobGriefing);
-//			DeltaHard.NET.sendToAllAround(
-//					new PacketClientExplosion(wither.posX, wither.posY, wither.posZ, 10, mobGriefing,
-//							explosion.getAffectedBlockPositions()),
-//					new TargetPoint(wither.dimension, wither.posX, wither.posY, wither.posZ, 64.0D));
-//			return;
-//		}
-//	}
+				fireball.world.createExplosion(null, fireball.posX, fireball.posY, fireball.posZ,
+						fireball.explosionPower, true, mobGriefing ? Mode.DESTROY : Mode.NONE);
+
+				DeltaHardMode.LOGGER.debug("Fireball {} {} {}", fireball.serverPosX, fireball.serverPosY,
+						fireball.serverPosZ);
+
+			}
+			fireball.remove();
+
+			return;
+		}
+	}
+
+	@SubscribeEvent
+	public void onArrowImpact(ProjectileImpactEvent.Arrow event) {
+		if (event.getEntity().world.isRemote)
+			return;
+
+		if (event.getRayTraceResult() instanceof EntityRayTraceResult) {
+			EntityRayTraceResult result = (EntityRayTraceResult) event.getRayTraceResult();
+
+			if (result.getEntity() instanceof FireballEntity) {
+				DeltaHardMode.LOGGER.debug("Arrow Impact - Explosion");
+
+				FireballEntity fireball = (FireballEntity) result.getEntity();
+
+				boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
+
+				fireball.world.createExplosion(null, fireball.posX, fireball.posY, fireball.posZ,
+						fireball.explosionPower, true, mobGriefing ? Mode.DESTROY : Mode.NONE);
+
+				fireball.remove();
+				return;
+			}
+		}
+
+	}
+
+	@SubscribeEvent
+	public void onFireballImpact(ProjectileImpactEvent.Fireball event) {
+		if (event.getEntity().world.isRemote)
+			return;
+
+		DeltaHardMode.LOGGER.debug("Fireball Impact {}", event.getFireball());
+
+		if (event.getFireball() instanceof DragonFireballEntity) {
+			DragonFireballEntity fireball = (DragonFireballEntity) event.getFireball();
+
+			DeltaHardMode.LOGGER.debug("Dragon Fireball Explosion", event.getFireball());
+
+			boolean mobGriefing = fireball.getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
+
+			fireball.world.createExplosion(fireball, fireball.posX, fireball.posY, fireball.posZ, 1.3F,
+					mobGriefing ? Mode.DESTROY : Mode.NONE);
+
+			fireball.remove();
+
+		}
+	}
+
+	@SubscribeEvent
+	public void onDamage(LivingDamageEvent event) {
+		LivingEntity entity = event.getEntityLiving();
+		if ((entity instanceof SpiderEntity || entity instanceof SpiderEntity)
+				&& event.getSource() == DamageSource.FALL) {
+			event.setCanceled(true);
+			return;
+		}
+		if (entity instanceof PlayerEntity && event.getSource() instanceof EntityDamageSource
+				&& ((EntityDamageSource) event.getSource()).getTrueSource() instanceof BlazeEntity) {
+			entity.setFire(4);
+			return;
+		}
+	}
 
 	@SubscribeEvent
 	public void onExplosionStart(ExplosionEvent.Start event) {
-		DeltaHardMode.LOGGER.debug("Explosion Start");
 		LivingEntity entity = event.getExplosion().getExplosivePlacedBy();
 		if (entity != null) {
 			if (entity instanceof CreeperEntity) {
