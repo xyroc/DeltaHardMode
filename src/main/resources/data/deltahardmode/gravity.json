@@ -1,0 +1,16 @@
+{
+  "gravity_blocks": [
+    "minecraft:grass_block",
+    "minecraft:dirt",
+    "minecraft:coarse_dirt",
+    "minecraft:cobblestone",
+    "minecraft:stone_stairs",
+    "minecraft:cobblestone_slab",
+    "minecraft:acacia_log",
+    "minecraft:birch_log",
+    "minecraft:dark_oak_log",
+    "minecraft:jungle_log",
+    "minecraft:oak_log",
+    "minecraft:spruce_log"
+  ]
+}

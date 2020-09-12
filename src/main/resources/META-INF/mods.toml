@@ -1,9 +1,10 @@
 modLoader="javafml" #mandatory
-loaderVersion="[29,)"
+loaderVersion="[32,)"
+license="All rights reserved"
 issueTrackerURL="http://my.issue.tracker/" #optional
 [[mods]] #mandatory
 modId="deltahardmode" #mandatory
-version="1.0.0" #mandatory
+version="1.1.0" #mandatory
 displayName="Delta Hard Mode" #mandatory
 updateJSONURL="http://myurl.me/" #optional
 #displayURL="http://example.com/" #optional
@@ -18,7 +19,7 @@ description='''
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency
-    versionRange="[29,)" #mandatory
+    versionRange="[32,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -26,6 +27,6 @@ description='''
 [[dependencies.deltahardmode]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15,)"
+    versionRange="[1.16.1,)"
     ordering="NONE"
     side="BOTH"
