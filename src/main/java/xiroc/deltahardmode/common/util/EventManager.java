@@ -28,6 +28,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
 import net.minecraft.world.Explosion.Mode;
@@ -140,7 +142,7 @@ public class EventManager {
         ServerWorld server = (ServerWorld) event.getWorld();
         if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
             return;
-        event.getWorld().getBlockState(event.getPos()).func_235734_a_(event.getWorld(), event.getPos(), 4);
+        event.getWorld().getBlockState(event.getPos()).updateNeighbours(event.getWorld(), event.getPos(), 4);
         FallingBlockHelper.checkFallable(server, event.getPos());
         FallingBlockHelper.updateNeighbors(server, event.getPos());
     }
@@ -153,7 +155,7 @@ public class EventManager {
         ServerWorld server = (ServerWorld) event.getWorld();
         if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
             return;
-        event.getWorld().getBlockState(event.getPos()).func_235734_a_(event.getWorld(), event.getPos(), 4);
+        event.getWorld().getBlockState(event.getPos()).updateNeighbours(event.getWorld(), event.getPos(), 4);
         FallingBlockHelper.checkFallable(server, event.getPos());
         FallingBlockHelper.updateNeighbors(server, event.getPos());
     }
@@ -165,7 +167,6 @@ public class EventManager {
             event.getDrops().removeIf(item -> item.getItem().getItem() == Items.BOW);
             return;
         }
-
         if (entity instanceof EndermanEntity) {
             for (ItemEntity item : event.getDrops()) {
                 if (item.getItem().getItem() == Items.ENDER_PEARL) {
@@ -356,7 +357,7 @@ public class EventManager {
             return;
         }
         if (entity instanceof StrayEntity) {
-            if (entity.world.func_230315_m_().func_242725_p() == DimensionType.field_242711_b) {
+            if (entity.world.getDimensionType() == DynamicRegistries.func_239770_b_().getRegistry(Registry.DIMENSION_TYPE_KEY).getValueForKey(DimensionType.THE_NETHER)) {
                 WitherSkeletonEntity skeleton = new WitherSkeletonEntity(EntityType.WITHER_SKELETON, entity.world);
                 skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                 skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
@@ -366,7 +367,7 @@ public class EventManager {
             }
         }
         if (entity instanceof SkeletonEntity) {
-            if (entity.world.func_230315_m_().func_242725_p() == DimensionType.field_242711_b) {
+            if (entity.world.getDimensionType() == DynamicRegistries.func_239770_b_().getRegistry(Registry.DIMENSION_TYPE_KEY).getValueForKey(DimensionType.THE_NETHER)) {
                 WitherSkeletonEntity skeleton = new WitherSkeletonEntity(EntityType.WITHER_SKELETON, entity.world);
                 skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                 skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
@@ -388,7 +389,7 @@ public class EventManager {
         }
         if (entity instanceof EvokerEntity) {
             EvokerEntity evoker = (EvokerEntity) entity;
-            evoker.getAttribute(Attributes.field_233818_a_).setBaseValue(50.0D);
+            evoker.getAttribute(Attributes.MAX_HEALTH).setBaseValue(50.0D);
             evoker.setHealth(evoker.getMaxHealth());
             return;
         }
@@ -403,7 +404,7 @@ public class EventManager {
         }
         if (entity.getType() == EntityType.SPIDER && entity instanceof SpiderEntity) {
             SpiderEntity spider = (SpiderEntity) entity;
-            spider.getAttribute(Attributes.field_233821_d_).setBaseValue(0.3D);
+            spider.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.3D);
             if (entity.world.rand.nextFloat() < 0.03 && !entity.isBeingRidden()) {
                 DeltaHardMode.LOGGER.info("Spider Jockey!");
                 AbstractSkeletonEntity skeleton = (entity.world.rand.nextFloat() > 0.07)
@@ -421,7 +422,7 @@ public class EventManager {
         if (entity instanceof HuskEntity) {
             HuskEntity husk = (HuskEntity) entity;
             //DeltaHardMode.LOGGER.debug("Husk base attack damage: {}", husk.getAttribute(Attributes.field_233823_f_).getValue());
-            husk.getAttribute(Attributes.field_233818_a_).setBaseValue(25.0D);
+            husk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(25.0D);
             //husk.getAttribute(Attributes.field_233823_f_).setBaseValue(3.0D);
             husk.setHealth(husk.getMaxHealth());
             return;
@@ -429,7 +430,7 @@ public class EventManager {
         if (entity instanceof ZombieEntity) {
             ZombieEntity zombie = (ZombieEntity) entity;
             if (!zombie.isChild()) {
-                zombie.getAttribute(Attributes.field_233821_d_).setBaseValue(0.27);
+                zombie.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.27);
             }
             if (entity.world.rand.nextFloat() <= 0.19 && !(entity.world.getBiome(new BlockPos(entity.getPosX(), entity.getPosY(), entity.getPosZ())).getCategory() == Biome.Category.DESERT)) {
                 HuskEntity husk = new HuskEntity(EntityType.HUSK, entity.world);
@@ -441,34 +442,34 @@ public class EventManager {
         }
         if (entity instanceof GhastEntity) {
             GhastEntity ghast = (GhastEntity) entity;
-            ghast.getAttribute(Attributes.field_233818_a_).setBaseValue(25.0D);
+            ghast.getAttribute(Attributes.MAX_HEALTH).setBaseValue(25.0D);
             ghast.setHealth(ghast.getMaxHealth());
             return;
         }
         if (entity instanceof WitchEntity) {
             WitchEntity witch = (WitchEntity) entity;
-            witch.getAttribute(Attributes.field_233818_a_).setBaseValue(30.0D);
-            witch.getAttribute(Attributes.field_233821_d_).setBaseValue(0.27D);
+            witch.getAttribute(Attributes.MAX_HEALTH).setBaseValue(30.0D);
+            witch.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.27D);
             witch.setHealth(witch.getMaxHealth());
             return;
         }
         if (entity instanceof ElderGuardianEntity) {
             ElderGuardianEntity elderGuardian = (ElderGuardianEntity) entity;
-            elderGuardian.getAttribute(Attributes.field_233818_a_).setBaseValue(100.0D);
+            elderGuardian.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100.0D);
             elderGuardian.setHealth(elderGuardian.getMaxHealth());
             return;
         }
         if (entity instanceof WitherEntity) {
             WitherEntity wither = (WitherEntity) entity;
-            wither.getAttribute(Attributes.field_233818_a_).setBaseValue(350.0D);
-            wither.getAttribute(Attributes.field_233821_d_).setBaseValue(0.65D);
+            wither.getAttribute(Attributes.MAX_HEALTH).setBaseValue(350.0D);
+            wither.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.65D);
             wither.setHealth(wither.getMaxHealth());
             return;
         }
         if (entity instanceof EnderDragonEntity) {
             EnderDragonEntity dragon = (EnderDragonEntity) entity;
-            dragon.getAttribute(Attributes.field_233818_a_).setBaseValue(250.0D);
-            dragon.getAttribute(Attributes.field_233821_d_).setBaseValue(7.2);
+            dragon.getAttribute(Attributes.MAX_HEALTH).setBaseValue(250.0D);
+            dragon.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(7.2);
             dragon.setHealth(dragon.getMaxHealth());
         }
     }
