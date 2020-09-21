@@ -20,18 +20,13 @@ public class FallingBlockHelper {
     }
 
     public static void checkFallable(World worldIn, BlockPos pos) {
-        if (!ConfigCache.gravityBlocks.contains(worldIn.getBlockState(pos).getBlock()))
+        if (worldIn.isRemote || !ConfigCache.gravityBlocks.contains(worldIn.getBlockState(pos).getBlock()))
             return;
         if (worldIn.isAirBlock(pos.down())
                 || canFallThrough(worldIn, pos, worldIn.getBlockState(pos.down())) && pos.getY() >= 0) {
-            if (!worldIn.isRemote) {
-//				DeltaHardMode.LOGGER.debug("Spawning a FallingBlockEntity at {}", pos);
-                FallingBlockEntity fallingblockentity = new FallingBlockEntity(worldIn, (double) pos.getX() + 0.5D,
-                        (double) pos.getY(), (double) pos.getZ() + 0.5D, worldIn.getBlockState(pos));
-//	            this.onStartFalling(fallingblockentity);
-                worldIn.addEntity(fallingblockentity);
-            }
-
+            FallingBlockEntity fallingblockentity = new FallingBlockEntity(worldIn, (double) pos.getX() + 0.5D,
+                    pos.getY(), (double) pos.getZ() + 0.5D, worldIn.getBlockState(pos));
+            worldIn.addEntity(fallingblockentity);
         }
     }
 

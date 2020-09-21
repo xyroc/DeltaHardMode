@@ -29,7 +29,7 @@ public class ConfigCache {
         ResourceLocation resource = DeltaHardMode.locate("gravity.json");
         if (resourceManager.hasResource(resource)) {
             JsonParser parser = new JsonParser();
-            parser.parse(new InputStreamReader(resourceManager.getResource(resource).getInputStream())).getAsJsonArray().forEach((jsonElement -> {
+            parser.parse(new InputStreamReader(resourceManager.getResource(resource).getInputStream())).getAsJsonObject().getAsJsonArray("gravity_blocks").forEach((jsonElement -> {
                 ResourceLocation block = new ResourceLocation(jsonElement.getAsString());
                 if (ForgeRegistries.BLOCKS.containsKey(block)) {
                     ConfigCache.gravityBlocks.add(ForgeRegistries.BLOCKS.getValue(block));

@@ -6,51 +6,61 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import xiroc.deltahardmode.DeltaHardMode;
 
 public class AnimalHelper {
 
     public static boolean interact(AnimalEntity entity, PlayerEntity player, ItemStack item) {
-        if (item == null || item == ItemStack.EMPTY)
+        if (item == null || item == ItemStack.EMPTY || entity.isChild())
             return false;
         World world = player.world;
-        DeltaHardMode.LOGGER.info("interacting with a(n) " + item + " (world.isRemote is " + world.isRemote + ")");
+        DeltaHardMode.LOGGER.debug("interacting with a(n) " + item + " (world.isRemote is " + world.isRemote + ")");
+        //        if (item.getItem() == Items.WHEAT && (entity instanceof CowEntity || entity instanceof SheepEntity)) {
+//            if (entity.isChild() && entity.isBreedingItem(item)) {
+//                if (world.isRemote)
+//                    return true;
+//                if (!player.isCreative())
+//                    item.shrink(1);
+//                player.getCooldownTracker().setCooldown(item.getItem(), 20);
+//                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
+//                return true;
+//            }
+//            return false;
+//        }
+//        if (item.getItem() == Items.CARROT && (entity instanceof PigEntity || entity instanceof RabbitEntity)) {
+//            if (entity.isChild() && entity.isBreedingItem(item)) {
+//                if (world.isRemote)
+//                    return true;
+//                if (!player.isCreative())
+//                    item.shrink(1);
+//                player.getCooldownTracker().setCooldown(item.getItem(), 20);
+//                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
+//                return true;
+//            }
+//            return false;
+//        }
+//        if (item.getItem() == Items.WHEAT_SEEDS && entity instanceof ChickenEntity) {
+//            if (entity.isChild() && entity.isBreedingItem(item)) {
+//                if (world.isRemote)
+//                    return true;
+//                if (!player.isCreative())
+//                    item.shrink(1);
+//                player.getCooldownTracker().setCooldown(item.getItem(), 20);
+//                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
+//                return true;
+//            }
+//            return false;
+//        }
         if (item.getItem() == Items.WHEAT && (entity instanceof CowEntity || entity instanceof SheepEntity)) {
-            if (entity.isChild() && entity.isBreedingItem(item)) {
-                if (world.isRemote)
-                    return true;
-                if (!player.isCreative())
-                    item.shrink(1);
-                player.getCooldownTracker().setCooldown(item.getItem(), 20);
-                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
-                return true;
-            }
-            return false;
+            return true;
         }
         if (item.getItem() == Items.CARROT && (entity instanceof PigEntity || entity instanceof RabbitEntity)) {
-            if (entity.isChild() && entity.isBreedingItem(item)) {
-                if (world.isRemote)
-                    return true;
-                if (!player.isCreative())
-                    item.shrink(1);
-                player.getCooldownTracker().setCooldown(item.getItem(), 20);
-                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
-                return true;
-            }
-            return false;
+            return true;
         }
         if (item.getItem() == Items.WHEAT_SEEDS && entity instanceof ChickenEntity) {
-            if (entity.isChild() && entity.isBreedingItem(item)) {
-                if (world.isRemote)
-                    return true;
-                if (!player.isCreative())
-                    item.shrink(1);
-                player.getCooldownTracker().setCooldown(item.getItem(), 20);
-                entity.ageUp((int) ((float) (-entity.getGrowingAge() / 20) * 0.1F), true);
-                return true;
-            }
-            return false;
+            return true;
         }
         if (item.getItem() == Items.GOLDEN_APPLE && (entity instanceof CowEntity || entity instanceof SheepEntity) && item.getDamage() == 0 && entity.getGrowingAge() == 0 && !entity.isInLove()) {
             if (!player.isCreative()) {
@@ -105,6 +115,7 @@ public class AnimalHelper {
     }
 
     private static void breed(AnimalEntity entity, PlayerEntity player) {
+        player.swingArm(Hand.MAIN_HAND);
         entity.setInLove(player);
     }
 

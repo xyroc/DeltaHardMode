@@ -21,7 +21,7 @@ import java.lang.reflect.Modifier;
 
 /*
  * Delta Hard Mode - 1.0.2
- * Sep 12 2020
+ * Sep 21 2020
  */
 
 @Mod(DeltaHardMode.MODID)
@@ -40,22 +40,25 @@ public class DeltaHardMode {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-		Config.load(FMLPaths.CONFIGDIR.get().resolve("deltahardmode.toml"));
-        try {
-            // Blocks
-            Field harvestLevel = Block.class.getDeclaredField(OBFUSCATED_VALUES ? "field_149782_v " : "harvestLevel");
-            harvestLevel.setAccessible(true);
+        Config.load(FMLPaths.CONFIGDIR.get().resolve("deltahardmode.toml"));
+        if (!Config.isDisabled("obsidian")) {
+            try {
+                // Blocks
+                Field harvestLevel = Block.class.getDeclaredField(OBFUSCATED_VALUES ? "field_149782_v " : "harvestLevel");
+                harvestLevel.setAccessible(true);
 
-            Field finalField = Field.class.getDeclaredField("modifiers");
-            finalField.setAccessible(true);
+                Field finalField = Field.class.getDeclaredField("modifiers");
+                finalField.setAccessible(true);
 
-            finalField.setInt(harvestLevel, harvestLevel.getModifiers() & ~Modifier.FINAL);
+                finalField.setInt(harvestLevel, harvestLevel.getModifiers() & ~Modifier.FINAL);
 
-            harvestLevel.setInt(Blocks.OBSIDIAN, 6);
-        } catch (Exception e) {
-            LOGGER.error("Failed to change the obsidian harvest level.");
-            e.printStackTrace();
+                harvestLevel.setInt(Blocks.OBSIDIAN, 6);
+            } catch (Exception e) {
+                LOGGER.error("Failed to change the obsidian harvest level.");
+                e.printStackTrace();
+            }
         }
+
     }
 
     @SubscribeEvent

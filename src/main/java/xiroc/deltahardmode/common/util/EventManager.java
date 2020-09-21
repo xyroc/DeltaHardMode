@@ -4,27 +4,24 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.CropsBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.*;
+import net.minecraft.entity.monster.piglin.PiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.DragonFireballEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.BoneMealItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.Hand;
@@ -32,19 +29,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.Explosion;
+import net.minecraft.world.*;
 import net.minecraft.world.Explosion.Mode;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
@@ -56,7 +50,6 @@ import xiroc.deltahardmode.DeltaHardMode;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
 
 public class EventManager {
 
@@ -114,9 +107,11 @@ public class EventManager {
                         event.getStack().shrink(1);
                         event.getPlayer().swingArm(event.getPlayer().getActiveHand());
                     }
-                } else
+                } else {
                     BoneMealItem.spawnBonemealParticles(worldIn, event.getPos(), 5);
+                }
             }
+            event.getPlayer().swingArm(Hand.MAIN_HAND);
         }
     }
 
@@ -124,7 +119,7 @@ public class EventManager {
     public void onPlayerTick(PlayerTickEvent event) {
         if (event.player.world.isRemote)
             return;
-        if (event.player.getSleepTimer() >= 80 /* && ConfigHelper.getProperty("NO_SLEEP") */) {
+        if (event.player.getSleepTimer() >= 80 && !Config.isDisabled("no_sleep")) {
             event.player.wakeUp();
             event.player.sendStatusMessage(new StringTextComponent("I cant sleep now..."), true);
         }
@@ -145,13 +140,11 @@ public class EventManager {
         ServerWorld server = (ServerWorld) event.getWorld();
         if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
             return;
-//		DeltaHardMode.LOGGER.debug("NeighborChange: {}", event.getPos());
         event.getWorld().getBlockState(event.getPos()).func_235734_a_(event.getWorld(), event.getPos(), 4);
         FallingBlockHelper.checkFallable(server, event.getPos());
         FallingBlockHelper.updateNeighbors(server, event.getPos());
     }
 
-    //
     @SubscribeEvent
     public void onBlockAdded(BlockEvent.EntityPlaceEvent event) {
         if (event.getWorld().isRemote() || Config.isDisabled("gravity")
@@ -160,7 +153,6 @@ public class EventManager {
         ServerWorld server = (ServerWorld) event.getWorld();
         if (!server.getChunkProvider().isChunkLoaded(new ChunkPos(event.getPos())) || server.getGameTime() < 20)
             return;
-//		DeltaHardMode.LOGGER.debug("Checking if fallable: {}", event.getPos());
         event.getWorld().getBlockState(event.getPos()).func_235734_a_(event.getWorld(), event.getPos(), 4);
         FallingBlockHelper.checkFallable(server, event.getPos());
         FallingBlockHelper.updateNeighbors(server, event.getPos());
@@ -169,34 +161,14 @@ public class EventManager {
     @SubscribeEvent
     public void onDrop(LivingDropsEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (entity instanceof CowEntity) {
-            if (!containsEntityItem(event.getDrops().iterator(), Items.LEATHER))
-                event.getDrops().add(new ItemEntity(entity.getEntityWorld(), entity.getPosX(), entity.getPosY(), entity.getPosZ(),
-                        new ItemStack(Items.LEATHER)));
-            return;
-        }
-        if ((entity instanceof SkeletonEntity || entity instanceof StrayEntity)
-            /* && ConfigHelper.getProperty("SKELETON_NO_BOW_DROP") */) {
+        if (entity instanceof SkeletonEntity || entity instanceof StrayEntity) {
             event.getDrops().removeIf(item -> item.getItem().getItem() == Items.BOW);
             return;
         }
-        if (entity instanceof SpiderEntity /* && ConfigHelper.getProperty("SPIDER_NO_STRING_DROP") */) {
-            event.getDrops().removeIf(item -> item.getItem().getItem() == Items.STRING);
-            return;
-        }
+
         if (entity instanceof EndermanEntity) {
             for (ItemEntity item : event.getDrops()) {
                 if (item.getItem().getItem() == Items.ENDER_PEARL) {
-                    int count = item.getItem().getCount();
-                    item.setItem(new ItemStack(item.getItem().getItem(),
-                            count >= 16 ? count : count + entity.world.rand.nextInt(2)));
-                }
-            }
-            return;
-        }
-        if (entity instanceof BlazeEntity) {
-            for (ItemEntity item : event.getDrops()) {
-                if (item.getItem().getItem() == Items.BLAZE_ROD) {
                     int count = item.getItem().getCount();
                     item.setItem(new ItemStack(item.getItem().getItem(),
                             count >= 16 ? count : count + entity.world.rand.nextInt(2)));
@@ -252,9 +224,7 @@ public class EventManager {
 //    public void onFireballImpact(ProjectileImpactEvent.Fireball event) {
 //        if (event.getEntity().world.isRemote)
 //            return;
-//
-//        DeltaHardMode.LOGGER.debug("Fireball Impact {}", event.getFireball());
-//
+////
 //        if (event.getFireball() instanceof DragonFireballEntity) {
 //            DragonFireballEntity fireball = (DragonFireballEntity) event.getFireball();
 //
@@ -342,19 +312,18 @@ public class EventManager {
         }
     }
 
+//    @SubscribeEvent
+//    public void onConstruct(EntityEvent event) {
+//        Entity entity = event.getEntity();
+//        if (entity instanceof AnimalEntity) {
+//            DeltaHardMode.LOGGER.info("init animal tasks on {}", entity);
+//            AnimalHelper.initAnimalTasks((AnimalEntity) entity);
+//        }
+//    }
+
     @SubscribeEvent
-    public void onEnterChunk(EntityEvent.EnteringChunk event) {
-        Entity entity = event.getEntity();
-        if (entity.world.isRemote || entity.ticksExisted > 5
-                || !event.getEntity().world.getChunkProvider().isChunkLoaded(entity))
-            return;
-        if (hasTag(entity))
-            return;
-        if (entity instanceof AnimalEntity) {
-            AnimalHelper.initAnimalTasks((AnimalEntity) entity);
-            return;
-        }
-        tagEntity(entity);
+    public void onSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
+        LivingEntity entity = event.getEntityLiving();
         if (entity instanceof CreeperEntity) {
             CreeperEntity creeper = (CreeperEntity) entity;
             CompoundNBT nbt = new CompoundNBT();
@@ -363,13 +332,12 @@ public class EventManager {
             creeper.readAdditional(nbt);
             return;
         }
-        if (entity instanceof ZombifiedPiglinEntity) {
+        if (entity instanceof ZombifiedPiglinEntity || entity instanceof PiglinEntity) {
             if (entity.world.rand.nextFloat() <= 0.05) {
                 CreeperEntity creeper = new CreeperEntity(EntityType.CREEPER, entity.world);
                 creeper.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-                tagEntity(creeper);
                 entity.world.addEntity(creeper);
-                entity.remove();
+                event.setCanceled(true);
             }
             return;
         }
@@ -382,10 +350,10 @@ public class EventManager {
             if (entity.world.rand.nextFloat() <= 0.07) {
                 GuardianEntity guardian = new GuardianEntity(EntityType.GUARDIAN, entity.world);
                 guardian.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-                tagEntity(guardian);
                 entity.world.addEntity(guardian);
-                entity.remove();
+                event.setCanceled(true);
             }
+            return;
         }
         if (entity instanceof StrayEntity) {
             if (entity.world.func_230315_m_().func_242725_p() == DimensionType.field_242711_b) {
@@ -393,8 +361,7 @@ public class EventManager {
                 skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                 skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
                 entity.world.addEntity(skeleton);
-                tagEntity(skeleton);
-                entity.remove();
+                event.setCanceled(true);
                 return;
             }
         }
@@ -404,8 +371,7 @@ public class EventManager {
                 skeleton.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                 skeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
                 entity.world.addEntity(skeleton);
-                tagEntity(skeleton);
-                entity.remove();
+                event.setCanceled(true);
                 return;
             }
             if (!(entity.world.getBiome(new BlockPos(entity.getPosX(), entity.getPosY(), entity.getPosZ())).getCategory() == Biome.Category.ICY)) {
@@ -414,8 +380,7 @@ public class EventManager {
                     stray.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                     stray.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
                     entity.world.addEntity(stray);
-                    tagEntity(stray);
-                    entity.remove();
+                    event.setCanceled(true);
                     return;
                 }
             }
@@ -431,38 +396,34 @@ public class EventManager {
             if (entity.world.rand.nextFloat() <= 0.09) {
                 IllusionerEntity illusionIllager = new IllusionerEntity(EntityType.ILLUSIONER, entity.world);
                 illusionIllager.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-                tagEntity(illusionIllager);
                 entity.world.addEntity(illusionIllager);
-                entity.remove();
+                event.setCanceled(true);
             }
             return;
         }
-        if (entity instanceof SpiderEntity) {
+        if (entity.getType() == EntityType.SPIDER && entity instanceof SpiderEntity) {
             SpiderEntity spider = (SpiderEntity) entity;
             spider.getAttribute(Attributes.field_233821_d_).setBaseValue(0.3D);
-            if (entity.world.rand.nextFloat() <= 0.06 && !entity.isBeingRidden()) {
-                LivingEntity entityskeleton = (entity.world.rand.nextFloat() > 0.09)
-                        ? new SkeletonEntity(EntityType.SKELETON, entity.world)
-                        : new StrayEntity(EntityType.STRAY, entity.world);
-                entityskeleton.setLocationAndAngles(entity.getPosX(), entity.getPosY(), entity.getPosZ(), entity.rotationYaw, 0.0F);
-                entityskeleton.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.BOW));
-                tagEntity(entityskeleton);
-                entity.world.addEntity(entityskeleton);
-                entityskeleton.startRiding(entity, true);
-                tagEntity(entity);
+            if (entity.world.rand.nextFloat() < 0.03 && !entity.isBeingRidden()) {
+                DeltaHardMode.LOGGER.info("Spider Jockey!");
+                AbstractSkeletonEntity skeleton = (entity.world.rand.nextFloat() > 0.07)
+                        ? EntityType.STRAY.create(entity.world)
+                        : EntityType.SKELETON.create(entity.world);
+                if (skeleton != null && entity.world instanceof IServerWorld) {
+                    skeleton.setLocationAndAngles(entity.getPosX(), entity.getPosY(), entity.getPosZ(), entity.rotationYaw, 0.0F);
+                    skeleton.onInitialSpawn((IServerWorld) entity.world, entity.world.getDifficultyForLocation(new BlockPos(entity.getPositionVec())),
+                            SpawnReason.JOCKEY, null, null);
+                    skeleton.startRiding(entity);
+                }
                 return;
             }
         }
         if (entity instanceof HuskEntity) {
             HuskEntity husk = (HuskEntity) entity;
+            //DeltaHardMode.LOGGER.debug("Husk base attack damage: {}", husk.getAttribute(Attributes.field_233823_f_).getValue());
             husk.getAttribute(Attributes.field_233818_a_).setBaseValue(25.0D);
-            husk.getAttribute(Attributes.field_233823_f_).setBaseValue(3.0D);
+            //husk.getAttribute(Attributes.field_233823_f_).setBaseValue(3.0D);
             husk.setHealth(husk.getMaxHealth());
-
-//			if (entity.world.rand.nextFloat() <= 0.04) { EntityZombieHorse horse = new
-//			EntityZombieHorse(entity.world); horse.setPosition(entity.posX, entity.posY,
-//			entity.posZ); horse.setHorseTamed(true); entity.world.spawnEntity(horse);
-//			entity.startRiding(horse); }
             return;
         }
         if (entity instanceof ZombieEntity) {
@@ -474,14 +435,8 @@ public class EventManager {
                 HuskEntity husk = new HuskEntity(EntityType.HUSK, entity.world);
                 husk.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                 entity.world.addEntity(husk);
-                entity.remove();
-                entity = husk;
+                event.setCanceled(true);
             }
-
-//			if (entity.world.rand.nextFloat() <= 0.02) { EntityZombieHorse horse = new
-//			EntityZombieHorse(entity.world); horse.setPosition(entity.posX, entity.posY,
-//			entity.posZ); horse.setHorseTamed(true); tagEntity(horse);
-//			entity.world.spawnEntity(horse); entity.startRiding(horse); }
             return;
         }
         if (entity instanceof GhastEntity) {
@@ -526,7 +481,6 @@ public class EventManager {
                 for (int i = 0; i < entity.world.rand.nextInt(3); i++) {
                     EndermiteEntity endermite = new EndermiteEntity(EntityType.ENDERMITE, entity.world);
                     endermite.setPosition(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-                    tagEntity(endermite);
                     entity.world.addEntity(endermite);
                 }
             }
@@ -535,28 +489,10 @@ public class EventManager {
 
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getTarget() instanceof AnimalEntity) {
-            event.setCancellationResult(ActionResultType.SUCCESS);
-            if (AnimalHelper.interact((AnimalEntity) event.getTarget(), event.getPlayer(), event.getItemStack())) {
-                event.setCanceled(true);
-            }
+        if (event.getTarget() instanceof AnimalEntity && AnimalHelper.interact((AnimalEntity) event.getTarget(), event.getPlayer(), event.getItemStack())) {
+            event.setCanceled(true);
         }
-    }
 
-    private static boolean containsEntityItem(Iterator<ItemEntity> iterator, Item item) {
-        while (iterator.hasNext()) {
-            if (iterator.next().getItem().getItem() == item)
-                return true;
-        }
-        return false;
-    }
-
-    private static void tagEntity(Entity entity) {
-        entity.getPersistentData().putBoolean("deltahardmode_tagged", true);
-    }
-
-    private static boolean hasTag(Entity entity) {
-        return entity.getPersistentData().contains("deltahardmode_tagged");
     }
 
 }
